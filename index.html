@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Low Back Pain Algorithm</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#0b1120;color:#e2e8f0;padding:12px}
+.wrap{max-width:760px;margin:0 auto}
+.topbar{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+#back-btn{width:38px;height:38px;border-radius:50%;border:1px solid #334155;background:#1e293b;color:#94a3b8;font-size:.95rem;cursor:pointer;display:none}
+.title{flex:1;font-size:.95rem;font-weight:700;color:#38bdf8;text-align:center}
+#new-btn{width:34px;height:34px;border-radius:50%;border:1px solid #334155;background:#1e293b;color:#94a3b8;font-size:.9rem;cursor:pointer}
+#prog-wrap{height:3px;background:#1e293b;border-radius:2px;margin-bottom:10px}
+#prog{height:100%;width:0;background:#38bdf8;border-radius:2px;transition:width .3s}
+#hist{margin-bottom:8px}
+.h-item{background:#1e293b;border-radius:8px;padding:8px 10px;margin-bottom:5px;border:1px solid #334155}
+.h-num{font-size:.55rem;color:#64748b;text-transform:uppercase;letter-spacing:.4px}
+.h-q{font-size:.74rem;color:#94a3b8;line-height:1.3;margin:2px 0}
+.h-a{font-size:.7rem;font-weight:600}
+.h-a.yes{color:#22c55e}.h-a.no{color:#ef4444}.h-a.opt{color:#a855f7}.h-a.warn{color:#f59e0b}
+.err{color:#ef4444;font-size:.8rem;background:#450a0a;padding:8px;border-radius:6px;margin-bottom:8px}
+.card{background:#1e293b;border-radius:12px;padding:14px;border:1px solid #334155;margin-bottom:8px}
+.num{font-size:.58rem;color:#38bdf8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;font-weight:600}
+.question{font-size:1rem;font-weight:600;color:#f8fafc;line-height:1.4;margin-bottom:10px}
+.teach{font-size:.74rem;color:#94a3b8;background:#0f172a;border-left:3px solid #38bdf8;padding:7px 9px;border-radius:5px;margin-bottom:10px;line-height:1.4;display:none}
+.btns{display:flex;flex-direction:column;gap:7px}
+.btn{padding:13px 12px;border-radius:9px;border:1px solid #475569;background:#273449;color:#e2e8f0;font-size:.83rem;font-weight:500;cursor:pointer;text-align:left;min-height:48px;line-height:1.3}
+.btn.yes{border-color:#15803d;background:#14532d}
+.btn.no{border-color:#991b1b;background:#450a0a}
+.btn.opt{border-color:#7c3aed;background:#3b0764}
+.btn.warn{border-color:#b45309;background:#451a03}
+.dx{display:inline-block;padding:2px 8px;border-radius:20px;font-size:.68rem;margin:2px;font-weight:500}
+.dx.emergency{background:#450a0a;color:#fca5a5;border:1px solid #ef4444}
+.dx.urgent{background:#431407;color:#fdba74;border:1px solid #f97316}
+.dx.moderate{background:#1c1917;color:#fde68a;border:1px solid #eab308}
+.dx.consider{background:#172554;color:#93c5fd;border:1px solid #3b82f6}
+.urg{display:inline-block;font-size:.54rem;padding:2px 7px;border-radius:20px;font-weight:700;text-transform:uppercase;margin-bottom:6px}
+.urg.emergency{background:#450a0a;color:#fca5a5;border:1px solid #ef4444}
+.urg.urgent{background:#431407;color:#fdba74;border:1px solid #f97316}
+.urg.moderate{background:#1c1917;color:#fde68a;border:1px solid #eab308}
+.section-lbl{font-size:.56rem;text-transform:uppercase;letter-spacing:.5px;color:#64748b;margin-bottom:3px;margin-top:8px}
+.act-text{font-size:.82rem;color:#e2e8f0;line-height:1.55;margin-bottom:8px}
+.action{background:#0f2815;border:1px solid #166534;border-radius:8px;padding:9px 11px}
+.action.red{background:#2a0a0a;border-color:#991b1b}
+.act-t{font-size:.68rem;font-weight:700;color:#4ade80;margin-bottom:3px}
+.action.red .act-t{color:#f87171}
+.act-b{font-size:.77rem;color:#e2e8f0;line-height:1.5}
+.panel{background:#1e293b;border-radius:12px;border:1px solid #334155;margin-bottom:8px;overflow:hidden;display:none}
+.p-head{background:#0f172a;padding:11px 13px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;border-bottom:1px solid #334155}
+.p-title{font-size:.84rem;font-weight:700}
+.p-sub{font-size:.6rem;color:#94a3b8;margin-top:1px}
+.p-arrow{color:#94a3b8;font-size:.65rem}
+.p-body{padding:10px;display:none}
+.clust{margin-bottom:8px}
+.clust-t{font-size:.58rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.4px;padding-bottom:3px;border-bottom:1px solid #334155;margin-bottom:4px}
+.ci{display:flex;gap:7px;padding:5px 0;border-bottom:1px solid #1e293b;align-items:flex-start}
+.ci:last-child{border-bottom:none}
+.cb{width:17px;height:17px;min-width:17px;border:2px solid #475569;border-radius:3px;background:#0f172a;cursor:pointer;margin-top:1px;text-align:center;font-size:.6rem;line-height:13px}
+.ib{flex:1}
+.iname{font-size:.78rem;color:#e2e8f0;display:block;line-height:1.3}
+.isub{font-size:.62rem;color:#94a3b8;margin-top:1px;display:block;line-height:1.3}
+.p-sum{margin-top:7px;padding:8px;background:#0f172a;border-radius:5px;font-size:.72rem;color:#e2e8f0;line-height:1.45}
+.bdg{font-size:.52rem;padding:1px 4px;border-radius:8px;margin-left:3px;font-weight:600}
+.b-nass{background:#1e3a5f;color:#93c5fd}
+.b-aospine{background:#431407;color:#fdba74}
+.b-aans{background:#172554;color:#bfdbfe}
+.b-consensus{background:#2d1b4e;color:#d8b4fe}
+#reset-btn{display:none;width:100%;padding:12px;background:#1e40af;color:#fff;border:none;border-radius:9px;font-size:.86rem;font-weight:600;cursor:pointer;margin-top:6px;margin-bottom:20px}
+.rel-banner{font-size:.62rem;font-weight:700;padding:5px 8px;border-radius:5px;margin-bottom:6px;letter-spacing:.3px}
+.sn-banner{background:#451a03;color:#fde68a;border:1px solid #b45309}
+.sx-banner{background:#052e16;color:#bbf7d0;border:1px solid #16a34a}
+.other-divider{font-size:.58rem;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin:10px 0 6px;padding-top:8px;border-top:1px solid #334155}
+.ci-rel{background:#0f1f10;border-radius:6px;padding:5px 6px;margin-bottom:3px}
+.ci-hl{border-left:2px solid #475569;padding-left:5px}
+.rel-name{color:#fde68a !important}
+.hl-name{color:#cbd5e1}
+.rel-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#f59e0b;margin-left:4px;vertical-align:middle}
+.sx-dot{background:#4ade80}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="err-display"></div>
+  <div class="topbar">
+    <button id="back-btn" onclick="goBack()">&#9664;</button>
+    <div class="title">Low Back Pain Algorithm</div>
+    <button id="new-btn" onclick="resetAll()">&#x21bb;</button>
+  </div>
+  <div id="prog-wrap"><div id="prog"></div></div>
+  <div id="hist"></div>
+  <div id="step-card" class="card">
+    <div id="s-num" class="num"></div>
+    <div id="s-text" class="question">Loading...</div>
+    <div id="s-teach" class="teach"></div>
+    <div id="s-btns" class="btns"></div>
+  </div>
+  <div id="result-card" class="card" style="display:none"></div>
+  <div id="sn-panel" class="panel"></div>
+  <div id="sx-panel" class="panel"></div>
+  <button id="reset-btn" onclick="resetAll()">Start New Case</button>
+</div>
+<script type="application/json" id="d-steps">{"start": {"num": "Step 1", "text": "Did the LBP start after trauma, fall, heavy lifting, or sudden movement?", "teach": "Traumatic onset changes the pre-test probability significantly \u2014 always ask mechanism first.", "options": [{"label": "YES \u2014 significant trauma (fall, RTA, heavy lift, sports)", "next": "trauma_severity", "cls": "yes"}, {"label": "NO \u2014 no trauma, spontaneous onset", "next": "no_trauma_fever", "cls": "no"}]}, "trauma_severity": {"num": "Step 2 \u2014 Trauma", "text": "Any neurological deficit, bladder/bowel dysfunction, or midline bony tenderness?", "teach": "Midline tenderness + trauma = fracture until proven otherwise. Bladder/bowel = cauda equina emergency.", "options": [{"label": "YES \u2014 deficit, bladder/bowel, or midline tenderness", "next": "trauma_vuln", "cls": "yes"}, {"label": "NO \u2014 neurologically intact, paraspinal tenderness only", "next": "result_strain", "cls": "no"}]}, "trauma_vuln": {"num": "Step 3 \u2014 Fracture Risk", "text": "Is the patient elderly (>65), osteoporotic, on steroids, or does the pain worsen with axial loading (standing/walking)?", "teach": "Vertebral compression fractures can occur with trivial trauma in vulnerable patients \u2014 even coughing.", "options": [{"label": "YES \u2014 vulnerable patient or axial-loading pain", "next": "result_fracture", "cls": "yes"}, {"label": "NO \u2014 young, healthy, neurological deficit present", "next": "result_cauda_trauma", "cls": "warn"}]}, "no_trauma_fever": {"num": "Step 2 \u2014 Systemic Flags", "text": "Fever, chills, night sweats, unexplained weight loss, or known cancer history?", "teach": "These are hard red flags. Never anchor on mechanical LBP without ruling these out first.", "options": [{"label": "Fever or signs of infection", "next": "infection_severity", "cls": "yes"}, {"label": "Weight loss / known cancer / constant night pain", "next": "malignancy_features", "cls": "opt"}, {"label": "None of these", "next": "vascular_check", "cls": "no"}]}, "infection_severity": {"num": "Step 3 \u2014 Infection", "text": "Rapidly progressive neurological deficit, or severely systemically unwell (septic)?", "teach": "Epidural abscess can progress from back pain to paralysis in hours. Don't miss this.", "options": [{"label": "YES \u2014 septic / neurological deficit developing", "next": "result_epidural_abscess", "cls": "yes"}, {"label": "Source identified or progressive without deficit", "next": "result_spondylodiscitis", "cls": "warn"}]}, "malignancy_features": {"num": "Step 3 \u2014 Malignancy", "text": "Constant pain unrelieved by any position, worse at night, age >50 with history of cancer?", "teach": "Metastatic disease is the most common malignant cause. Myeloma can present in younger patients.", "options": [{"label": "YES \u2014 classic malignancy profile", "next": "result_malignancy_urgent", "cls": "yes"}, {"label": "Atypical or younger / no cancer history", "next": "result_malignancy_imaging", "cls": "warn"}]}, "vascular_check": {"num": "Step 3 \u2014 Vascular", "text": "Sudden tearing or pulsatile LBP, completely unrelated to spinal position, in elderly male with vascular risk factors?", "teach": "AAA and aortic dissection are life-threatening causes of LBP. Pain not positional is the key clue.", "options": [{"label": "YES \u2014 tearing / pulsatile / positionally independent", "next": "result_vascular", "cls": "yes"}, {"label": "NO \u2014 positional component present", "next": "neuro_check", "cls": "no"}]}, "neuro_check": {"num": "Step 4 \u2014 Neurological", "text": "Does pain radiate into the leg, or are there bilateral leg symptoms, gait disturbance, or bladder/bowel dysfunction?", "teach": "Unilateral leg radiation = radiculopathy. Bilateral + gait + bladder = neurogenic claudication or cauda equina.", "options": [{"label": "Unilateral leg radiation / dermatomal numbness / tingling", "next": "radicular_pattern", "cls": "yes"}, {"label": "Bilateral legs + gait disturbance / neurogenic claudication", "next": "stenosis_check", "cls": "opt"}, {"label": "Bladder/bowel dysfunction + saddle anaesthesia", "next": "result_cauda_equina", "cls": "warn"}, {"label": "NO \u2014 purely axial LBP", "next": "referred_check", "cls": "no"}]}, "radicular_pattern": {"num": "Step 5 \u2014 Radiculopathy", "text": "What is the predominant provocation pattern?", "teach": "Flexion/Valsalva = disc herniation. Extension/rotation = facet/foraminal. Spondylolysis is extension in young athletes.", "options": [{"label": "Worse with flexion, sitting, coughing, Valsalva (SLR positive)", "next": "result_disc_herniation", "cls": "yes"}, {"label": "Worse with extension, rotation, or prolonged standing", "next": "result_facet_radicular", "cls": "opt"}, {"label": "Young athlete, extension sport, unilateral LBP", "next": "result_spondylolysis", "cls": "warn"}]}, "stenosis_check": {"num": "Step 5 \u2014 Stenosis", "text": "Does walking reproduce leg symptoms that are relieved by sitting or leaning forward (shopping cart sign)?", "teach": "Neurogenic claudication is classic for lumbar canal stenosis. Vascular claudication also improves with rest but not posture.", "options": [{"label": "YES \u2014 walking provokes, forward flexion or sitting relieves", "next": "result_stenosis", "cls": "yes"}, {"label": "Post-surgical / hardware / previous spine surgery", "next": "result_post_surgical", "cls": "warn"}]}, "referred_check": {"num": "Step 5 \u2014 Referred Pain", "text": "Any flank pain, urinary symptoms, pelvic pain, gynaecological symptoms, or GI symptoms?", "teach": "Visceral LBP is not positional and will not improve with physiotherapy. Always exclude before diagnosing mechanical LBP.", "options": [{"label": "Flank pain / colicky / haematuria / urinary symptoms", "next": "result_renal", "cls": "yes"}, {"label": "Pelvic / gynaecological / lower abdominal (female)", "next": "result_gynaecological", "cls": "opt"}, {"label": "GI / abdominal / radiation to groin (male)", "next": "result_visceral_gi", "cls": "warn"}, {"label": "None of these", "next": "inflammatory_check", "cls": "no"}]}, "inflammatory_check": {"num": "Step 6 \u2014 Inflammatory", "text": "Morning stiffness >1 hour, improves with activity, better with NSAIDs, age <45, insidious onset?", "teach": "Inflammatory back pain has a characteristic pattern: worse with rest, better with movement, NSAIDs dramatically effective.", "options": [{"label": "YES \u2014 all features, HLA-B27 risk, sacroiliac involvement", "next": "result_spondyloarthropathy", "cls": "yes"}, {"label": "Partial / age >45 / diffuse stiffness", "next": "result_mixed_inflammatory", "cls": "opt"}, {"label": "NO", "next": "metabolic_check", "cls": "no"}]}, "metabolic_check": {"num": "Step 6 \u2014 Metabolic & Bone", "text": "Age >60, known osteoporosis, chronic steroid use, or known Paget's / hyperparathyroidism?", "teach": "Metabolic bone disease can produce LBP through microfractures, deformity, or nerve compromise.", "options": [{"label": "YES \u2014 osteoporosis / steroids / sudden worsening in elderly", "next": "result_metabolic_fracture", "cls": "yes"}, {"label": "Known Paget's / hyperparathyroidism / osteomalacia", "next": "result_metabolic_bone", "cls": "opt"}, {"label": "NO", "next": "mechanical_check", "cls": "no"}]}, "mechanical_check": {"num": "Step 7 \u2014 Mechanical Pattern", "text": "What best describes the pain pattern?", "teach": "Mechanical LBP improves with position change. True myofascial pain has trigger points and is not dermatomal.", "options": [{"label": "Flexion / sitting / Valsalva worse \u2014 discogenic", "next": "result_mechanical_disc", "cls": "yes"}, {"label": "Extension / rotation / prolonged standing worse \u2014 facet/SIJ", "next": "result_mechanical_facet", "cls": "opt"}, {"label": "Diffuse / trigger points / posture / stress \u2014 myofascial", "next": "result_myofascial", "cls": "no"}]}, "result_strain": {"num": "Result", "result": {"impression": "Lumbar muscle strain / ligament sprain", "dx": [{"name": "Muscle strain / ligament sprain", "level": "moderate"}, {"name": "Acute disc herniation (early)", "level": "consider"}], "action": "Reassure, keep active, avoid bed rest. NSAIDs and muscle relaxants short-term. Physiotherapy if not resolving in 2 weeks. Red flags review at every follow-up.", "red": false}}, "result_fracture": {"num": "Result", "result": {"impression": "Vertebral compression fracture \u2014 possible pathological", "dx": [{"name": "Vertebral Compression Fracture (osteoporotic/pathological)", "level": "urgent"}, {"name": "Pathological fracture (malignancy)", "level": "urgent"}, {"name": "Traumatic burst fracture", "level": "urgent"}], "action": "Urgent plain X-ray lumbar spine. If osteoporotic, MRI to exclude malignancy. Neurosurgical referral if instability or neurological signs. Brace and analgesia. DEXA scan and bisphosphonate workup.", "red": true}}, "result_cauda_trauma": {"num": "Result", "result": {"impression": "Traumatic cauda equina / cord compression", "dx": [{"name": "Traumatic burst fracture with cord involvement", "level": "emergency"}, {"name": "Epidural hematoma post-trauma", "level": "emergency"}, {"name": "Cauda equina syndrome (traumatic)", "level": "emergency"}], "action": "EMERGENCY. Immediate neurosurgical referral. Urgent MRI spine. Bladder catheterisation. Do NOT mobilise. Spinal immobilisation if fracture suspected.", "red": true}}, "result_epidural_abscess": {"num": "Result", "result": {"impression": "Epidural abscess \u2014 surgical emergency", "dx": [{"name": "Spinal epidural abscess", "level": "emergency"}, {"name": "Septic discitis with cord compression", "level": "emergency"}, {"name": "Psoas abscess with extension", "level": "emergency"}], "action": "EMERGENCY. Blood cultures immediately. Urgent MRI spine. Neurosurgical referral same day. IV antibiotics after cultures. Do NOT delay for blood results if neurological deterioration.", "red": true}}, "result_spondylodiscitis": {"num": "Result", "result": {"impression": "Vertebral osteomyelitis / infectious spondylitis", "dx": [{"name": "Vertebral osteomyelitis / discitis", "level": "urgent"}, {"name": "Tuberculosis (Pott's disease)", "level": "urgent"}, {"name": "Brucellosis", "level": "urgent"}, {"name": "Psoas abscess", "level": "urgent"}], "action": "Urgent bloods: ESR, CRP, blood cultures x3, Brucella titres, Mantoux/IGRA. MRI lumbar spine. Infectious disease referral. Do NOT start antibiotics before cultures if patient stable. Egypt: always consider TB and brucellosis.", "red": true}}, "result_vascular": {"num": "Result", "result": {"impression": "Vascular emergency \u2014 AAA or aortic dissection", "dx": [{"name": "Abdominal aortic aneurysm (ruptured/expanding)", "level": "emergency"}, {"name": "Aortic dissection (thoracoabdominal)", "level": "emergency"}], "action": "IMMEDIATE resuscitation. Large-bore IV access, group & crossmatch. Urgent CT angiography if haemodynamically stable. Vascular surgery activation. Do NOT send for plain films \u2014 time is critical.", "red": true}}, "result_malignancy_urgent": {"num": "Result", "result": {"impression": "Malignancy until proven otherwise", "dx": [{"name": "Metastatic spinal disease", "level": "urgent"}, {"name": "Multiple myeloma / plasmacytoma", "level": "urgent"}, {"name": "Primary bone tumor (chordoma, GCT, Ewing's)", "level": "urgent"}, {"name": "Retroperitoneal lymphoma", "level": "urgent"}, {"name": "Ewing's Sarcoma", "level": "urgent"}, {"name": "Giant Cell Tumor (vertebral)", "level": "urgent"}], "action": "Urgent MRI whole spine. Bloods: FBC, ESR, CRP, PSA (male), Ca, PO4, ALP, SPEP, Bence Jones protein. Bone scan or PET-CT if MRI equivocal. Oncology referral. Do NOT discharge.", "red": true}}, "result_malignancy_imaging": {"num": "Result", "result": {"impression": "Possible early or atypical malignancy \u2014 imaging required", "dx": [{"name": "Osteoid osteoma / osteoblastoma", "level": "urgent"}, {"name": "Haemangioma (aggressive)", "level": "urgent"}, {"name": "Renal cell carcinoma (referred)", "level": "urgent"}, {"name": "Lymphoma / haematological malignancy", "level": "urgent"}, {"name": "Vertebral Hemangioma (aggressive)", "level": "consider"}], "action": "MRI lumbar spine urgent. Bloods: ESR, CRP, FBC, renal function, calcium. CT chest/abdomen/pelvis if systemic malignancy suspected. Do not delay \u2014 osteoid osteoma in young patients is treatable.", "red": false}}, "result_cauda_equina": {"num": "Result", "result": {"impression": "Cauda equina syndrome \u2014 surgical emergency", "dx": [{"name": "Cauda equina syndrome (disc herniation)", "level": "emergency"}, {"name": "Cauda equina syndrome (epidural hematoma/abscess)", "level": "emergency"}, {"name": "Cauda equina syndrome (malignancy)", "level": "emergency"}], "action": "EMERGENCY. Urgent MRI lumbar spine SAME HOUR. Neurosurgical referral immediately. Bladder catheterisation. Do NOT wait for morning list. Outcome is time-dependent.", "red": true}}, "result_disc_herniation": {"num": "Result", "result": {"impression": "Lumbar disc herniation with radiculopathy", "dx": [{"name": "Lumbar disc herniation (L4/L5 or L5/S1)", "level": "moderate"}, {"name": "Foraminal stenosis", "level": "moderate"}, {"name": "DDD with radiculopathy", "level": "consider"}], "action": "MRI lumbar spine. Analgesia: NSAIDs, gabapentinoids, short oral steroids. Physiotherapy. Epidural steroid injection if refractory. Surgical referral if motor deficit or failure of 6 weeks conservative care.", "red": false}}, "result_facet_radicular": {"num": "Result", "result": {"impression": "Facet arthropathy with referred / radicular pain", "dx": [{"name": "Lumbar facet arthropathy with foraminal stenosis", "level": "moderate"}, {"name": "Spondylolisthesis with radiculopathy", "level": "moderate"}, {"name": "Uncovertebral / facet hypertrophy", "level": "consider"}], "action": "MRI lumbar spine. Extension-pattern physiotherapy. Facet joint injection or medial branch block if refractory. Surgical decompression if radiculopathy fails 6 weeks conservative care.", "red": false}}, "result_spondylolysis": {"num": "Result", "result": {"impression": "Spondylolysis or spondylolisthesis \u2014 young athlete", "dx": [{"name": "Spondylolysis (pars stress fracture)", "level": "moderate"}, {"name": "Spondylolisthesis (isthmic)", "level": "moderate"}, {"name": "Scheuermann's disease", "level": "consider"}], "action": "SPECT CT or MRI with STIR sequences to detect pars defect. Activity restriction, avoid extension sports. Physiotherapy \u2014 core stabilisation. Bracing in acute pars fracture. Surgical fusion if high-grade slip or failure.", "red": false}}, "result_stenosis": {"num": "Result", "result": {"impression": "Lumbar spinal stenosis with neurogenic claudication", "dx": [{"name": "Lumbar spinal stenosis", "level": "moderate"}, {"name": "Spondylolisthesis (degenerative)", "level": "moderate"}, {"name": "Tethered cord syndrome (adult)", "level": "consider"}], "action": "MRI lumbar spine. Rule out vascular claudication (ABI). Physiotherapy \u2014 flexion-based exercises. Epidural steroid injections. Surgical decompression (laminectomy \u00b1 fusion) if functional limitation refractory to 3 months conservative care.", "red": false}}, "result_post_surgical": {"num": "Result", "result": {"impression": "Post-surgical LBP \u2014 FBSS, adjacent segment, or hardware failure", "dx": [{"name": "Failed back surgery syndrome (FBSS)", "level": "moderate"}, {"name": "Adjacent segment disease", "level": "moderate"}, {"name": "Hardware failure / pseudarthrosis", "level": "urgent"}], "action": "MRI with metal artefact reduction (MARS) or CT lumbar spine. Review original operative report. Spine surgery referral. Exclude infection (ESR/CRP). Neuromodulation (SCS) if FBSS confirmed.", "red": false}}, "result_renal": {"num": "Result", "result": {"impression": "Renal or urological referred pain", "dx": [{"name": "Renal colic (urolithiasis)", "level": "urgent"}, {"name": "Pyelonephritis", "level": "urgent"}, {"name": "Renal cell carcinoma", "level": "urgent"}, {"name": "Prostatitis (male)", "level": "moderate"}], "action": "Urinalysis + microscopy. Renal function, FBC, CRP. CT KUB (non-contrast) for stone. Ultrasound if infection. Urology referral if obstruction or mass. IV antibiotics if pyelonephritis.", "red": true}}, "result_gynaecological": {"num": "Result", "result": {"impression": "Gynaecological referred LBP", "dx": [{"name": "Endometriosis", "level": "moderate"}, {"name": "Ovarian cyst / torsion", "level": "urgent"}, {"name": "Pelvic inflammatory disease (PID)", "level": "urgent"}, {"name": "Ectopic pregnancy", "level": "emergency"}, {"name": "Uterine Fibroids", "level": "moderate"}], "action": "Urine beta-hCG immediately (exclude ectopic). Pelvic ultrasound. Gynaecology referral. If ectopic: EMERGENCY surgical consult. CRP, FBC if PID suspected.", "red": true}}, "result_visceral_gi": {"num": "Result", "result": {"impression": "Visceral / GI referred LBP", "dx": [{"name": "Acute pancreatitis", "level": "urgent"}, {"name": "Retroperitoneal pathology", "level": "urgent"}, {"name": "Prostatitis (male)", "level": "moderate"}], "action": "Serum amylase / lipase. LFTs, FBC, CRP. CT abdomen/pelvis if pancreatitis or retroperitoneal mass suspected. PSA if male >50. GI / urology referral as indicated.", "red": true}}, "result_spondyloarthropathy": {"num": "Result", "result": {"impression": "Axial spondyloarthropathy", "dx": [{"name": "Ankylosing spondylitis (AS)", "level": "moderate"}, {"name": "Psoriatic arthritis (axial)", "level": "moderate"}, {"name": "Reactive arthritis", "level": "moderate"}, {"name": "IBD-related spondyloarthropathy", "level": "consider"}], "action": "MRI sacroiliac joints (STIR). HLA-B27. ESR, CRP. Rheumatology referral. NSAIDs first-line. Biologic therapy (anti-TNF / IL-17) if refractory. Check for uveitis and psoriasis.", "red": false}}, "result_mixed_inflammatory": {"num": "Result", "result": {"impression": "Possible inflammatory component \u2014 DISH or PMR", "dx": [{"name": "DISH (Forestier's disease)", "level": "consider"}, {"name": "Polymyalgia rheumatica", "level": "moderate"}, {"name": "Early AS (seronegative)", "level": "consider"}], "action": "ESR, CRP, ALP. Plain X-ray lumbar spine. MRI sacroiliac joints if AS suspected. Rheumatology referral. PMR: prednisolone trial dramatic response. DISH: usually benign, physiotherapy.", "red": false}}, "result_metabolic_fracture": {"num": "Result", "result": {"impression": "Osteoporotic or pathological fracture", "dx": [{"name": "Osteoporotic compression fracture", "level": "urgent"}, {"name": "Pathological fracture (malignancy)", "level": "urgent"}, {"name": "Steroid-induced vertebral fracture", "level": "urgent"}], "action": "MRI lumbar spine to exclude malignancy. DEXA scan. Bloods: Ca, PO4, ALP, PTH, Vit D, SPEP. Bisphosphonate/denosumab. Vertebroplasty/kyphoplasty if refractory. Neurosurgical referral if instability.", "red": true}}, "result_metabolic_bone": {"num": "Result", "result": {"impression": "Metabolic bone disease", "dx": [{"name": "Paget's disease (lumbar)", "level": "moderate"}, {"name": "Hyperparathyroidism", "level": "moderate"}, {"name": "Osteomalacia / Vitamin D deficiency", "level": "moderate"}, {"name": "Osteoporosis (symptomatic)", "level": "moderate"}], "action": "ALP, Ca, PO4, PTH, Vit D, urine Ca. Plain X-ray. Bone scan for Paget's activity. Endocrinology referral. Replace Vit D. Bisphosphonate for Paget's.", "red": false}}, "result_mechanical_disc": {"num": "Result", "result": {"impression": "Mechanical discogenic LBP", "dx": [{"name": "Degenerative disc disease (DDD)", "level": "consider"}, {"name": "Bertolotti's syndrome", "level": "consider"}, {"name": "Early disc herniation", "level": "consider"}], "action": "Reassure, active mobilisation. NSAIDs, physiotherapy. MRI only if not improving at 6 weeks or red flags. Avoid prolonged bed rest. Occupational review.", "red": false}}, "result_mechanical_facet": {"num": "Result", "result": {"impression": "Facet arthropathy or SIJ dysfunction", "dx": [{"name": "Lumbar facet arthropathy", "level": "consider"}, {"name": "Sacroiliac joint dysfunction", "level": "consider"}, {"name": "Spondylolysis (chronic)", "level": "consider"}, {"name": "Maigne syndrome (T12/L1)", "level": "consider"}, {"name": "Piriformis syndrome", "level": "consider"}], "action": "Physiotherapy \u2014 extension and stabilisation exercises. NSAIDs. Facet joint injection or SIJ injection if refractory. FABER/FADIR/Fortin finger tests to guide injection site.", "red": false}}, "result_myofascial": {"num": "Result", "result": {"impression": "Myofascial pain or chronic primary LBP", "dx": [{"name": "Myofascial pain syndrome", "level": "consider"}, {"name": "Fibromyalgia", "level": "consider"}, {"name": "Chronic primary LBP", "level": "consider"}, {"name": "Somatic symptom disorder", "level": "consider"}], "action": "Biopsychosocial assessment. Active physiotherapy and graded exercise. Psychological referral if central sensitisation. Avoid opioids. Amitriptyline or duloxetine for central pain. Address sleep, stress, catastrophising.", "red": false}}}</script>
+<script type="application/json" id="d-safety">[{"cluster": "Vascular Emergencies", "items": [{"name": "AAA (ruptured / expanding)", "clue": "Tearing pulsatile LBP, positionally independent, elderly male, pulsatile mass"}, {"name": "Aortic dissection", "clue": "Sudden tearing pain, pulse differential, Marfan, hypertension"}]}, {"cluster": "Cauda Equina Syndrome", "items": [{"name": "Cauda equina \u2014 bladder/bowel dysfunction", "clue": "Urinary retention, incontinence, saddle anaesthesia \u2014 surgical emergency"}, {"name": "Saddle anaesthesia", "clue": "Numbness in perineum / inner thighs \u2014 must ask every radiculopathy patient"}]}, {"cluster": "Infection", "items": [{"name": "Epidural abscess", "clue": "Fever + back pain + neurological deficit \u2014 hours to paralysis"}, {"name": "TB spine (Pott's disease)", "clue": "Insidious, night sweats, weight loss \u2014 Egypt endemic, never miss"}, {"name": "Brucellosis", "clue": "Livestock / dairy contact, undulant fever, sacroiliac involvement \u2014 Egypt relevant"}, {"name": "Psoas abscess", "clue": "Hip flexion pain, fever, secondary to discitis or Crohn's"}]}, {"cluster": "Malignancy", "items": [{"name": "Metastatic spinal disease", "clue": "Constant night pain, age >50, known cancer \u2014 most common spinal malignancy"}, {"name": "Multiple myeloma", "clue": "Bone pain, anaemia, hypercalcaemia, renal impairment \u2014 check SPEP"}, {"name": "Retroperitoneal lymphoma", "clue": "Flank/back pain, night sweats, palpable mass"}, {"name": "Osteoid osteoma", "clue": "Night pain relieved by aspirin in young patients \u2014 don't miss"}]}, {"cluster": "Referred Visceral", "items": [{"name": "Ectopic pregnancy", "clue": "Any female of reproductive age \u2014 beta-hCG first, always"}, {"name": "Renal cell carcinoma", "clue": "Flank pain, haematuria, weight loss \u2014 painless haematuria is cancer until proven otherwise"}, {"name": "Acute pancreatitis", "clue": "Epigastric band-like pain radiating to back, vomiting, amylase"}, {"name": "Prostatitis / prostatic carcinoma", "clue": "Male, perineal / pelvic pain, urinary symptoms \u2014 PSA"}]}, {"cluster": "Post-Surgical & Hardware", "items": [{"name": "Hardware failure / pseudarthrosis", "clue": "Post-fusion recurrent pain, metal artefact on CT"}, {"name": "Adjacent segment disease", "clue": "New pain above/below fusion level, years post-op"}]}, {"cluster": "Neurological", "items": [{"name": "Tethered cord syndrome (adult)", "clue": "Bilateral leg weakness, urinary urgency, progressive \u2014 low conus on MRI"}, {"name": "Spinal cord infarction", "clue": "Sudden onset bilateral weakness, no trauma \u2014 anterior spinal artery syndrome"}]}]</script>
+<script type="application/json" id="d-surgery">[{"cluster": "Lumbar Discectomy \u2014 Microdiscectomy", "items": [{"name": "Failure of \u22656 weeks conservative care", "criteria": "Physiotherapy, NSAIDs, activity modification", "source": "NASS"}, {"name": "Concordant disc herniation on MRI", "criteria": "Correlating level with clinical dermatomal signs", "source": "NASS"}, {"name": "Positive SLR \u00b1 neurological deficit", "criteria": "Motor, sensory, or reflex changes matching MRI level", "source": "NASS+AANS"}, {"name": "Progressive motor deficit", "criteria": "Foot drop or quad weakness \u2014 expedite regardless of duration", "source": "NASS+AANS"}, {"name": "Severe unremitting radicular pain", "criteria": "Functional impairment despite maximum conservative care", "source": "NASS"}]}, {"cluster": "Cauda Equina \u2014 Emergency Decompression", "items": [{"name": "Bladder / bowel dysfunction", "criteria": "Retention or incontinence \u2014 operate within hours", "source": "Consensus"}, {"name": "Saddle anaesthesia", "criteria": "Perineal / inner thigh numbness \u2014 do not wait", "source": "Consensus"}, {"name": "Rapidly progressive bilateral weakness", "criteria": "Both legs deteriorating \u2014 MRI immediately", "source": "AO Spine"}]}, {"cluster": "Lumbar Spinal Stenosis \u2014 Decompression \u00b1 Fusion", "items": [{"name": "Neurogenic claudication refractory to conservative care", "criteria": "\u22653 months physiotherapy and injections failed", "source": "NASS"}, {"name": "MRI-confirmed canal stenosis", "criteria": "Moderate-to-severe stenosis correlating with symptoms", "source": "NASS"}, {"name": "Degenerative spondylolisthesis with stenosis", "criteria": "Fusion indicated if instability present", "source": "NASS"}, {"name": "Progressive neurological deficit", "criteria": "Motor weakness or gait deterioration \u2014 expedite", "source": "AANS"}]}, {"cluster": "Lumbar Fusion \u2014 Instability / Deformity", "items": [{"name": "High-grade spondylolisthesis (Grade III\u2013V)", "criteria": "Slip >50% \u2014 surgical stabilisation", "source": "AO Spine"}, {"name": "Segmental instability on dynamic X-ray", "criteria": ">4mm translation or >10\u00b0 angulation", "source": "NASS"}, {"name": "Degenerative scoliosis with functional decline", "criteria": "Progressive deformity with refractory pain", "source": "AO Spine"}, {"name": "Failed back surgery \u2014 pseudarthrosis / hardware failure", "criteria": "Confirmed non-union or hardware breakage", "source": "NASS"}]}, {"cluster": "Vertebroplasty / Kyphoplasty", "items": [{"name": "Osteoporotic compression fracture, refractory pain", "criteria": "Acute fracture (<6 weeks) with significant pain", "source": "NASS"}, {"name": "Pathological fracture (malignancy)", "criteria": "Structural compromise \u2014 oncological team involvement", "source": "AANS"}, {"name": "No cord compression", "criteria": "MRI must confirm absence of posterior element involvement", "source": "NASS"}]}, {"cluster": "Emergency / Urgent Surgery", "items": [{"name": "Cauda equina syndrome (any cause)", "criteria": "Time-sensitive \u2014 outcome worsens with each hour of delay", "source": "Consensus"}, {"name": "Epidural abscess with neurological deficit", "criteria": "Decompression + drainage + IV antibiotics", "source": "AANS"}, {"name": "Traumatic fracture with instability", "criteria": "Burst fracture, Chance fracture \u2014 fixation", "source": "AO Spine"}, {"name": "Oncological cord compression with deficit", "criteria": "Surgery or RT \u2014 oncology/neurosurgery joint decision", "source": "AANS"}]}]</script>
+<script type="application/json" id="d-rel">{"result_strain": {"sn": ["Cauda equina \u2014 bladder/bowel dysfunction", "Epidural abscess", "Metastatic spinal disease"], "sx": []}, "result_fracture": {"sn": ["Metastatic spinal disease", "Multiple myeloma", "Hardware failure / pseudarthrosis"], "sx": ["Osteoporotic compression fracture, refractory pain", "Pathological fracture (malignancy)", "No cord compression"]}, "result_cauda_trauma": {"sn": ["Cauda equina \u2014 bladder/bowel dysfunction", "Saddle anaesthesia", "Epidural abscess"], "sx": ["Cauda equina syndrome (any cause)", "Traumatic fracture with instability", "Rapidly progressive bilateral weakness"]}, "result_epidural_abscess": {"sn": ["Epidural abscess", "TB spine (Pott's disease)", "Psoas abscess"], "sx": ["Epidural abscess with neurological deficit", "Cauda equina syndrome (any cause)"]}, "result_spondylodiscitis": {"sn": ["Epidural abscess", "TB spine (Pott's disease)", "Brucellosis", "Psoas abscess"], "sx": ["Epidural abscess with neurological deficit"]}, "result_vascular": {"sn": ["AAA (ruptured / expanding)", "Aortic dissection"], "sx": []}, "result_malignancy_urgent": {"sn": ["Metastatic spinal disease", "Multiple myeloma", "Retroperitoneal lymphoma", "Osteoid osteoma"], "sx": ["Oncological cord compression with deficit", "Pathological fracture (malignancy)"]}, "result_malignancy_imaging": {"sn": ["Metastatic spinal disease", "Osteoid osteoma", "Renal cell carcinoma"], "sx": ["Oncological cord compression with deficit"]}, "result_cauda_equina": {"sn": ["Cauda equina \u2014 bladder/bowel dysfunction", "Saddle anaesthesia"], "sx": ["Cauda equina syndrome (any cause)", "Bladder / bowel dysfunction", "Saddle anaesthesia", "Rapidly progressive bilateral weakness"]}, "result_disc_herniation": {"sn": ["Cauda equina \u2014 bladder/bowel dysfunction", "Saddle anaesthesia", "Metastatic spinal disease"], "sx": ["Failure of \u22656 weeks conservative care", "Concordant disc herniation on MRI", "Positive SLR \u00b1 neurological deficit", "Progressive motor deficit", "Severe unremitting radicular pain"]}, "result_facet_radicular": {"sn": ["Cauda equina \u2014 bladder/bowel dysfunction", "Metastatic spinal disease"], "sx": ["Failure of \u22656 weeks conservative care", "Concordant disc herniation on MRI", "Degenerative spondylolisthesis with stenosis"]}, "result_spondylolysis": {"sn": ["Osteoid osteoma", "Metastatic spinal disease"], "sx": ["High-grade spondylolisthesis (Grade III\u2013V)", "Segmental instability on dynamic X-ray"]}, "result_stenosis": {"sn": ["Cauda equina \u2014 bladder/bowel dysfunction", "Tethered cord syndrome (adult)", "Spinal cord infarction"], "sx": ["Neurogenic claudication refractory to conservative care", "MRI-confirmed canal stenosis", "Degenerative spondylolisthesis with stenosis", "Progressive neurological deficit"]}, "result_post_surgical": {"sn": ["Hardware failure / pseudarthrosis", "Adjacent segment disease", "Epidural abscess"], "sx": ["Failed back surgery \u2014 pseudarthrosis / hardware failure", "Adjacent segment disease"]}, "result_renal": {"sn": ["Renal cell carcinoma", "Ectopic pregnancy", "AAA (ruptured / expanding)"], "sx": []}, "result_gynaecological": {"sn": ["Ectopic pregnancy", "Retroperitoneal lymphoma"], "sx": []}, "result_visceral_gi": {"sn": ["Acute pancreatitis", "Prostatitis / prostatic carcinoma", "AAA (ruptured / expanding)"], "sx": []}, "result_spondyloarthropathy": {"sn": ["Metastatic spinal disease", "TB spine (Pott's disease)", "Brucellosis"], "sx": []}, "result_mixed_inflammatory": {"sn": ["Metastatic spinal disease", "Multiple myeloma"], "sx": []}, "result_metabolic_fracture": {"sn": ["Metastatic spinal disease", "Multiple myeloma", "Hardware failure / pseudarthrosis"], "sx": ["Vertebroplasty / Kyphoplasty", "Osteoporotic compression fracture, refractory pain", "Pathological fracture (malignancy)"]}, "result_metabolic_bone": {"sn": ["Metastatic spinal disease", "Multiple myeloma", "Osteoid osteoma"], "sx": []}, "result_mechanical_disc": {"sn": ["Metastatic spinal disease", "Cauda equina \u2014 bladder/bowel dysfunction", "Osteoid osteoma"], "sx": ["Failure of \u22656 weeks conservative care", "Concordant disc herniation on MRI"]}, "result_mechanical_facet": {"sn": ["Metastatic spinal disease", "Cauda equina \u2014 bladder/bowel dysfunction", "Brucellosis"], "sx": ["Failure of \u22656 weeks conservative care", "Segmental instability on dynamic X-ray"]}, "result_myofascial": {"sn": ["Metastatic spinal disease", "Cauda equina \u2014 bladder/bowel dysfunction", "Ectopic pregnancy"], "sx": []}}</script>
+<script>
+var STEPS, SN, SC, REL;
+var hist = [];
+
+function ge(id){ return document.getElementById(id); }
+function show(id){ ge(id).style.display = "block"; }
+function hide(id){ ge(id).style.display = "none"; }
+function err(msg){ ge("err-display").innerHTML = '<div class="err">ERROR: ' + msg + '</div>'; }
+
+try { STEPS = JSON.parse(ge("d-steps").textContent);   } catch(e){ err("STEPS: "+e.message); }
+try { SN    = JSON.parse(ge("d-safety").textContent);  } catch(e){ err("SN: "+e.message); }
+try { SC    = JSON.parse(ge("d-surgery").textContent); } catch(e){ err("SC: "+e.message); }
+try { REL   = JSON.parse(ge("d-rel").textContent);     } catch(e){ err("REL: "+e.message); }
+
+function setProg(n){ ge("prog").style.width = Math.min(100, Math.round(n/6*100)) + "%"; }
+
+function renderHist(){
+  var out = "";
+  for(var i=0; i<hist.length; i++){
+    var x = hist[i];
+    out += '<div class="h-item">';
+    out += '<div class="h-num">' + x.num + '</div>';
+    out += '<div class="h-q">' + x.q + '</div>';
+    out += '<div class="h-a ' + x.cls + '">✓ ' + x.a + '</div>';
+    out += '</div>';
+  }
+  ge("hist").innerHTML = out;
+  ge("back-btn").style.display = hist.length > 0 ? "block" : "none";
+  setProg(hist.length);
+}
+
+document.addEventListener("click", function(e){
+  var head = e.target;
+  while(head && head.getAttribute && !head.getAttribute("data-panel-toggle")){ head = head.parentNode; }
+  if(!head || !head.getAttribute) return;
+  var pid = head.getAttribute("data-panel-toggle");
+  var panel = ge(pid);
+  if(!panel) return;
+  var body = panel.querySelector(".p-body");
+  var arrow = panel.querySelector(".p-arrow");
+  if(!body) return;
+  if(body.style.display === "block"){
+    body.style.display = "none";
+    if(arrow) arrow.textContent = "►";
+  } else {
+    body.style.display = "block";
+    if(arrow) arrow.textContent = "▼";
+  }
+});
+
+document.addEventListener("click", function(e){
+  var cb = e.target;
+  if(!cb.getAttribute || !cb.getAttribute("data-cb")) return;
+  var panelId = cb.getAttribute("data-cb");
+  var isSN = panelId === "sn-panel";
+  var on = cb.getAttribute("data-on") === "1";
+  if(on){
+    cb.setAttribute("data-on","0");
+    cb.textContent = "";
+    cb.style.background = "#0f172a";
+    cb.style.borderColor = "#475569";
+    cb.style.color = "";
+    var nm = cb.parentNode.querySelector(".iname");
+    if(nm){ nm.style.color = ""; nm.style.fontWeight = ""; }
+  } else {
+    cb.setAttribute("data-on","1");
+    cb.textContent = "✓";
+    cb.style.background = isSN ? "#f59e0b" : "#4ade80";
+    cb.style.borderColor = isSN ? "#f59e0b" : "#4ade80";
+    cb.style.color = isSN ? "#1c1917" : "#052e16";
+    var nm2 = cb.parentNode.querySelector(".iname");
+    if(nm2){ nm2.style.color = isSN ? "#f59e0b" : "#4ade80"; nm2.style.fontWeight = "600"; }
+  }
+  updateSum(panelId);
+});
+
+function updateSum(panelId){
+  var panel = ge(panelId);
+  var isSN = panelId === "sn-panel";
+  var cbs = panel.querySelectorAll(".cb[data-on='1']");
+  var sum = panel.querySelector(".p-sum");
+  if(!sum) return;
+  if(!cbs.length){
+    sum.innerHTML = isSN
+      ? "<b style='color:#f59e0b'>All safety-net items ruled out.</b> Proceed with confidence."
+      : "<b style='color:#4ade80'>No surgical indications met.</b> Continue conservative management.";
+  } else {
+    var names = [];
+    for(var i=0; i<cbs.length; i++){
+      var nm = cbs[i].parentNode.querySelector(".iname");
+      if(nm) names.push((nm.textContent||nm.innerText).replace(/NASS|AO Spine|AANS|Consensus/g,"").trim());
+    }
+    sum.innerHTML = "<b style='color:"+(isSN?"#f59e0b":"#4ade80")+"'>" + cbs.length + (isSN?" item(s) NOT ruled out":" indication(s) met") + ":</b> " + names.join("; ");
+  }
+}
+
+function strHas(hay, needle){ return hay.toLowerCase().indexOf(needle.toLowerCase()) > -1; }
+
+function isRel(name, list){
+  for(var i=0; i<list.length; i++){ if(strHas(name, list[i]) || strHas(list[i], name)) return true; }
+  return false;
+}
+
+function buildSNPanel(resultId){
+  var relList = (REL[resultId] && REL[resultId].sn) ? REL[resultId].sn : [];
+  var out = '<div class="p-head" data-panel-toggle="sn-panel">';
+  out += '<div><div class="p-title" style="color:#f59e0b">Safety Net</div>';
+  out += '<div class="p-sub">Tap items you have NOT excluded</div></div>';
+  out += '<span class="p-arrow">▼</span></div>';
+  out += '<div class="p-body" style="display:block">';
+  if(relList.length > 0){
+    out += '<div class="rel-banner sn-banner">⚠️ Most relevant for this diagnosis</div>';
+    for(var c=0; c<SN.length; c++){
+      for(var i=0; i<SN[c].items.length; i++){
+        var it = SN[c].items[i];
+        if(!isRel(it.name, relList)) continue;
+        out += '<div class="ci ci-rel">';
+        out += '<div class="cb" data-cb="sn-panel" data-on="0"></div>';
+        out += '<div class="ib"><span class="iname rel-name">'+it.name+'</span><span class="isub">'+it.clue+'</span></div>';
+        out += '</div>';
+      }
+    }
+    out += '<div class="other-divider">All items</div>';
+  }
+  for(var c=0; c<SN.length; c++){
+    out += '<div class="clust"><div class="clust-t">'+SN[c].cluster+'</div>';
+    for(var i=0; i<SN[c].items.length; i++){
+      var it = SN[c].items[i];
+      var hl = isRel(it.name, relList);
+      out += '<div class="ci'+(hl?' ci-hl':'')+'">';
+      out += '<div class="cb" data-cb="sn-panel" data-on="0"></div>';
+      out += '<div class="ib"><span class="iname'+(hl?' hl-name':'')+'">' + it.name + (hl?'<span class="rel-dot"></span>':'') + '</span><span class="isub">'+it.clue+'</span></div>';
+      out += '</div>';
+    }
+    out += '</div>';
+  }
+  out += '<div class="p-sum"><b style="color:#f59e0b">All safety-net items ruled out.</b> Proceed with confidence.</div>';
+  out += '</div>';
+  return out;
+}
+
+function buildSXPanel(resultId){
+  var relList = (REL[resultId] && REL[resultId].sx) ? REL[resultId].sx : [];
+  var out = '<div class="p-head" data-panel-toggle="sx-panel">';
+  out += '<div><div class="p-title" style="color:#4ade80">Surgical Indications</div>';
+  out += '<div class="p-sub">Tap criteria that ARE met</div></div>';
+  out += '<span class="p-arrow">►</span></div>';
+  out += '<div class="p-body">';
+  if(relList.length > 0){
+    out += '<div class="rel-banner sx-banner">★ Most relevant surgical criteria</div>';
+    for(var c=0; c<SC.length; c++){
+      for(var i=0; i<SC[c].items.length; i++){
+        var it = SC[c].items[i];
+        if(!isRel(it.name, relList)) continue;
+        var src = it.source.toLowerCase().replace(/[^a-z]/g,"");
+        out += '<div class="ci ci-rel">';
+        out += '<div class="cb" data-cb="sx-panel" data-on="0"></div>';
+        out += '<div class="ib"><span class="iname rel-name">'+it.name+'<span class="bdg b-'+src+'">'+it.source+'</span></span><span class="isub">'+it.criteria+'</span></div>';
+        out += '</div>';
+      }
+    }
+    out += '<div class="other-divider">All criteria</div>';
+  }
+  for(var c=0; c<SC.length; c++){
+    out += '<div class="clust"><div class="clust-t">'+SC[c].cluster+'</div>';
+    for(var i=0; i<SC[c].items.length; i++){
+      var it = SC[c].items[i];
+      var hl = isRel(it.name, relList);
+      var src = it.source.toLowerCase().replace(/[^a-z]/g,"");
+      out += '<div class="ci'+(hl?' ci-hl':'')+'">';
+      out += '<div class="cb" data-cb="sx-panel" data-on="0"></div>';
+      out += '<div class="ib"><span class="iname'+(hl?' hl-name':'')+'">' + it.name + (hl?'<span class="sx-dot rel-dot"></span>':'') + '<span class="bdg b-'+src+'">'+it.source+'</span></span><span class="isub">'+it.criteria+'</span></div>';
+      out += '</div>';
+    }
+    out += '</div>';
+  }
+  out += '<div class="p-sum"><b style="color:#4ade80">No surgical indications met.</b> Continue conservative management.</div>';
+  out += '<p style="font-size:.57rem;color:#64748b;margin-top:6px;padding-top:5px;border-top:1px solid #334155">Sources: NASS Evidence-Based Clinical Guidelines; AO Spine/CSRS DCM Guidelines; AANS/CNS Clinical Practice Guidelines.</p>';
+  out += '</div>';
+  return out;
+}
+
+function go(id){
+  try{
+    var s = STEPS[id];
+    if(!s){ err("Unknown step: "+id); return; }
+    if(s.result){
+      hide("step-card");
+      show("result-card");
+      show("sn-panel");
+      show("sx-panel");
+      show("reset-btn");
+      var r = s.result;
+      var urg = r.red ? "emergency" : (function(){ for(var i=0;i<r.dx.length;i++){ if(r.dx[i].level==="urgent") return "urgent"; } return "moderate"; })();
+      var pills = "";
+      for(var i=0;i<r.dx.length;i++){ pills += '<span class="dx '+r.dx[i].level+'">'+r.dx[i].name+'</span>'; }
+      ge("result-card").innerHTML =
+        '<span class="urg '+urg+'">'+urg+'</span>'+
+        '<div class="question">'+r.impression+'</div>'+
+        '<div class="section-lbl">Differential</div>'+
+        '<div>'+pills+'</div>'+
+        '<div class="section-lbl">Action</div>'+
+        '<div class="act-text">'+r.action+'</div>'+
+        '<div class="action'+(r.red?' red':'')+'">'+
+        '<div class="act-t">'+(r.red?'URGENCY - Do NOT delay':'Next Steps')+'</div>'+
+        '<div class="act-b">'+(r.red?'Requires urgent/emergency intervention. Do not discharge without imaging and senior review.':'Monitor. If red flags develop, restart algorithm.')+'</div>'+
+        '</div>';
+      ge("sn-panel").innerHTML = buildSNPanel(id);
+      ge("sx-panel").innerHTML = buildSXPanel(id);
+      renderHist();
+      return;
+    }
+    show("step-card");
+    hide("result-card");
+    hide("sn-panel");
+    hide("sx-panel");
+    hide("reset-btn");
+    ge("s-num").textContent = s.num;
+    ge("s-text").textContent = s.text;
+    if(s.teach){ ge("s-teach").textContent = s.teach; ge("s-teach").style.display = "block"; }
+    else { ge("s-teach").style.display = "none"; }
+    var btns = ge("s-btns");
+    btns.innerHTML = "";
+    for(var j=0;j<s.options.length;j++){
+      var o = s.options[j];
+      var b = document.createElement("button");
+      b.className = "btn "+(o.cls||"");
+      b.textContent = o.label;
+      (function(nxt,lbl,cls,num,qtxt){
+        b.onclick = function(){
+          hist.push({num:num,q:qtxt,a:lbl,cls:cls||"opt",nextId:nxt});
+          renderHist();
+          go(nxt);
+        };
+      })(o.next,o.label,o.cls,s.num,s.text);
+      btns.appendChild(b);
+    }
+    renderHist();
+  }catch(e){ err("go("+id+"): "+e.message); }
+}
+
+function goBack(){
+  if(!hist.length) return;
+  hist.pop();
+  var prevId = hist.length > 0 ? hist[hist.length-1].nextId : "start";
+  if(hist.length > 0) hist.pop();
+  renderHist();
+  go(prevId);
+}
+
+function resetAll(){
+  hist = [];
+  hide("result-card"); hide("sn-panel"); hide("sx-panel"); hide("reset-btn");
+  ge("hist").innerHTML = "";
+  ge("back-btn").style.display = "none";
+  setProg(0);
+  show("step-card");
+  go("start");
+}
+
+go("start");
+</script>
+</body>
+</html>

@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Neck Pain Algorithm</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#0b1120;color:#e2e8f0;padding:12px}
+.wrap{max-width:760px;margin:0 auto}
+.topbar{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+#back-btn{width:38px;height:38px;border-radius:50%;border:1px solid #334155;background:#1e293b;color:#94a3b8;font-size:.95rem;cursor:pointer;display:none}
+.title{flex:1;font-size:.95rem;font-weight:700;color:#38bdf8;text-align:center}
+#new-btn{width:34px;height:34px;border-radius:50%;border:1px solid #334155;background:#1e293b;color:#94a3b8;font-size:.9rem;cursor:pointer}
+#prog-wrap{height:3px;background:#1e293b;border-radius:2px;margin-bottom:10px}
+#prog{height:100%;width:0;background:#38bdf8;border-radius:2px}
+#hist{margin-bottom:8px}
+.h-item{background:#1e293b;border-radius:8px;padding:8px 10px;margin-bottom:5px;border:1px solid #334155}
+.h-num{font-size:.55rem;color:#64748b;text-transform:uppercase;letter-spacing:.4px}
+.h-q{font-size:.74rem;color:#94a3b8;line-height:1.3;margin:2px 0}
+.h-a{font-size:.7rem;font-weight:600}
+.h-a.yes{color:#22c55e}.h-a.no{color:#ef4444}.h-a.opt{color:#a855f7}.h-a.warn{color:#f59e0b}
+.err{color:#ef4444;font-size:.8rem;background:#450a0a;padding:8px;border-radius:6px;margin-bottom:8px}
+.card{background:#1e293b;border-radius:12px;padding:14px;border:1px solid #334155;margin-bottom:8px}
+.num{font-size:.58rem;color:#38bdf8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;font-weight:600}
+.question{font-size:1rem;font-weight:600;color:#f8fafc;line-height:1.4;margin-bottom:10px}
+.teach{font-size:.74rem;color:#94a3b8;background:#0f172a;border-left:3px solid #38bdf8;padding:7px 9px;border-radius:5px;margin-bottom:10px;line-height:1.4;display:none}
+.btns{display:flex;flex-direction:column;gap:7px}
+.btn{padding:13px 12px;border-radius:9px;border:1px solid #475569;background:#273449;color:#e2e8f0;font-size:.83rem;font-weight:500;cursor:pointer;text-align:left;min-height:48px;line-height:1.3}
+.btn.yes{border-color:#15803d;background:#14532d}
+.btn.no{border-color:#991b1b;background:#450a0a}
+.btn.opt{border-color:#7c3aed;background:#3b0764}
+.btn.warn{border-color:#b45309;background:#451a03}
+.dx{display:inline-block;padding:2px 8px;border-radius:20px;font-size:.68rem;margin:2px;font-weight:500}
+.dx.emergency{background:#450a0a;color:#fca5a5;border:1px solid #ef4444}
+.dx.urgent{background:#431407;color:#fdba74;border:1px solid #f97316}
+.dx.moderate{background:#1c1917;color:#fde68a;border:1px solid #eab308}
+.dx.consider{background:#172554;color:#93c5fd;border:1px solid #3b82f6}
+.urg{display:inline-block;font-size:.54rem;padding:2px 7px;border-radius:20px;font-weight:700;text-transform:uppercase;margin-bottom:6px}
+.urg.emergency{background:#450a0a;color:#fca5a5;border:1px solid #ef4444}
+.urg.urgent{background:#431407;color:#fdba74;border:1px solid #f97316}
+.urg.moderate{background:#1c1917;color:#fde68a;border:1px solid #eab308}
+.section-lbl{font-size:.56rem;text-transform:uppercase;letter-spacing:.5px;color:#64748b;margin-bottom:3px;margin-top:8px}
+.act-text{font-size:.82rem;color:#e2e8f0;line-height:1.55;margin-bottom:8px}
+.action{background:#0f2815;border:1px solid #166534;border-radius:8px;padding:9px 11px}
+.action.red{background:#2a0a0a;border-color:#991b1b}
+.act-t{font-size:.68rem;font-weight:700;color:#4ade80;margin-bottom:3px}
+.action.red .act-t{color:#f87171}
+.act-b{font-size:.77rem;color:#e2e8f0;line-height:1.5}
+.panel{background:#1e293b;border-radius:12px;border:1px solid #334155;margin-bottom:8px;overflow:hidden;display:none}
+.p-head{background:#0f172a;padding:11px 13px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;border-bottom:1px solid #334155}
+.p-title{font-size:.84rem;font-weight:700}
+.p-sub{font-size:.6rem;color:#94a3b8;margin-top:1px}
+.p-arrow{color:#94a3b8;font-size:.65rem}
+.p-body{padding:10px;display:none}
+.clust{margin-bottom:8px}
+.clust-t{font-size:.58rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.4px;padding-bottom:3px;border-bottom:1px solid #334155;margin-bottom:4px}
+.ci{display:flex;gap:7px;padding:5px 0;border-bottom:1px solid #1e293b;align-items:flex-start}
+.ci:last-child{border-bottom:none}
+.cb{width:17px;height:17px;min-width:17px;border:2px solid #475569;border-radius:3px;background:#0f172a;cursor:pointer;margin-top:1px;text-align:center;font-size:.6rem;line-height:13px}
+.ib{flex:1}
+.iname{font-size:.78rem;color:#e2e8f0;display:block;line-height:1.3}
+.isub{font-size:.62rem;color:#94a3b8;margin-top:1px;display:block;line-height:1.3}
+.p-sum{margin-top:7px;padding:8px;background:#0f172a;border-radius:5px;font-size:.72rem;color:#e2e8f0;line-height:1.45}
+.bdg{font-size:.52rem;padding:1px 4px;border-radius:8px;margin-left:3px;font-weight:600}
+.b-nass{background:#1e3a5f;color:#93c5fd}
+.b-aospine{background:#431407;color:#fdba74}
+.b-aans{background:#172554;color:#bfdbfe}
+.b-consensus{background:#2d1b4e;color:#d8b4fe}
+#reset-btn{display:none;width:100%;padding:12px;background:#1e40af;color:#fff;border:none;border-radius:9px;font-size:.86rem;font-weight:600;cursor:pointer;margin-top:6px;margin-bottom:20px}
+
+/* Highlight styles */
+.rel-banner{font-size:.62rem;font-weight:700;padding:5px 8px;border-radius:5px;margin-bottom:6px;letter-spacing:.3px}
+.sn-banner{background:#451a03;color:#fde68a;border:1px solid #b45309}
+.sx-banner{background:#052e16;color:#bbf7d0;border:1px solid #16a34a}
+.other-divider{font-size:.58rem;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin:10px 0 6px;padding-top:8px;border-top:1px solid #334155}
+.ci-rel{background:#0f1f10;border-radius:6px;padding:5px 6px;margin-bottom:3px}
+.ci-hl{border-left:2px solid #475569;padding-left:5px}
+.rel-name{color:#fde68a !important}
+.hl-name{color:#cbd5e1}
+.rel-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#f59e0b;margin-left:4px;vertical-align:middle}
+.sx-dot{background:#4ade80}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="err-display"></div>
+  <div class="topbar">
+    <button id="back-btn" onclick="goBack()">&#9664;</button>
+    <div class="title">Neck Pain Algorithm</div>
+    <button id="new-btn" onclick="resetAll()">&#x21bb;</button>
+  </div>
+  <div id="prog-wrap"><div id="prog"></div></div>
+  <div id="hist"></div>
+  <div id="step-card" class="card">
+    <div id="s-num" class="num"></div>
+    <div id="s-text" class="question">Loading...</div>
+    <div id="s-teach" class="teach"></div>
+    <div id="s-btns" class="btns"></div>
+  </div>
+  <div id="result-card" class="card" style="display:none"></div>
+  <div id="sn-panel" class="panel"></div>
+  <div id="sx-panel" class="panel"></div>
+  <button id="reset-btn" onclick="resetAll()">Start New Case</button>
+</div>
+
+<script type="application/json" id="d-steps">{"start": {"num": "Step 1", "text": "Did the patient have any trauma before the neck pain started?", "teach": "Trauma is always first. Even minor trauma in the elderly or osteoporotic can cause odontoid fracture.", "options": [{"label": "YES - Major trauma (fall, RTA, sports, assault)", "cls": "yes", "next": "trauma_major", "tag": "Trauma"}, {"label": "YES - Minor trauma / whiplash / manipulation", "cls": "opt", "next": "trauma_minor", "tag": "Minor Trauma"}, {"label": "NO - No trauma", "cls": "no", "next": "systemic_redflags", "tag": "No Trauma"}]}, "trauma_major": {"num": "Step 2 - Major Trauma", "text": "Any neurological deficit, altered consciousness, or midline cervical tenderness?", "teach": "Major trauma + deficit = cord injury or epidural hematoma. Immobilize first.", "options": [{"label": "Deficit / altered GCS / midline tenderness", "cls": "yes", "next": "emergency_trauma", "tag": "Deficit"}, {"label": "Neurologically intact, no midline tenderness", "cls": "no", "next": "imaging_trauma", "tag": "Intact"}]}, "emergency_trauma": {"num": "EMERGENCY PATH", "result": {"impression": "Cervical spine trauma with possible cord injury", "dx": [{"name": "Cervical fracture/dislocation", "level": "emergency"}, {"name": "Cord contusion/compression", "level": "emergency"}, {"name": "Epidural hematoma", "level": "emergency"}], "action": "IMMEDIATE immobilization. Emergency CT cervical spine. MRI if deficit. Neurosurgery NOW. Do NOT remove collar until cleared.", "red": true}}, "imaging_trauma": {"num": "Step 3 - Trauma Imaging", "text": "Patient is elderly, osteoporotic, on steroids, has RA, Down syndrome, or ankylosing spondylitis?", "teach": "Vulnerable patients: odontoid fracture, atlanto-axial instability, or chalk-stick fracture in AS can occur with minimal trauma.", "options": [{"label": "YES - vulnerable patient", "cls": "yes", "next": "urgent_trauma", "tag": "Vulnerable"}, {"label": "NO - healthy adult", "cls": "no", "next": "whiplash", "tag": "Healthy"}]}, "urgent_trauma": {"num": "URGENT PATH", "result": {"impression": "Possible pathological or upper cervical injury", "dx": [{"name": "Odontoid fracture", "level": "urgent"}, {"name": "Atlanto-axial instability", "level": "urgent"}, {"name": "Hangman's fracture", "level": "urgent"}, {"name": "Chalk-stick fracture (AS)", "level": "urgent"}], "action": "Immobilize. CT cervical spine including C1-C2. If RA/AS: flexion-extension only AFTER CT clears fracture. Neurosurgery review.", "red": true}}, "whiplash": {"num": "MECHANICAL PATH", "result": {"impression": "Whiplash-associated disorder vs soft tissue strain", "dx": [{"name": "WAD (Whiplash)", "level": "consider"}, {"name": "Ligament sprain", "level": "consider"}, {"name": "Muscle strain", "level": "consider"}, {"name": "Cervicogenic headache", "level": "consider"}], "action": "Short-term collar (1-2 weeks max). Analgesia. Early mobilization better than prolonged rest. MRI if symptoms persist >6 weeks or neurology develops.", "red": false}}, "trauma_minor": {"num": "Step 2 - Minor Trauma", "text": "Was there chiropractic manipulation, sudden rotation, or hyperextension? Is pain sudden and severe?", "teach": "Manipulation + sudden severe neck pain = vertebral artery dissection until proven otherwise.", "options": [{"label": "Sudden severe after manipulation/rotation", "cls": "yes", "next": "dissection", "tag": "Vascular"}, {"label": "Delayed onset, milder after whiplash", "cls": "opt", "next": "whiplash", "tag": "Whiplash"}, {"label": "No manipulation, diffuse ache", "cls": "no", "next": "systemic_redflags", "tag": "Atypical"}]}, "dissection": {"num": "EMERGENCY PATH", "result": {"impression": "Vertebral or carotid artery dissection", "dx": [{"name": "Vertebral artery dissection", "level": "emergency"}, {"name": "Carotid artery dissection", "level": "emergency"}], "action": "EMERGENCY CTA head and neck. Brainstem signs (vertigo, dysphagia, Horner's) -> stroke activation. Antithrombotic per stroke team.", "red": true}}, "systemic_redflags": {"num": "Step 2 - Systemic Red Flags", "text": "Fever, chills, night sweats, unexplained weight loss, or known cancer / immunosuppression?", "teach": "Infection and malignancy are the two most dangerous non-traumatic causes. This screen cannot be skipped.", "options": [{"label": "Fever or infection signs", "cls": "yes", "next": "infection", "tag": "Infection"}, {"label": "Weight loss or known cancer", "cls": "opt", "next": "malignancy", "tag": "Cancer"}, {"label": "None of these", "cls": "no", "next": "neuro_vascular", "tag": "No Red Flags"}]}, "infection": {"num": "Step 3 - Infection Source", "text": "Recent dental/skin infection, IV drug use, immunosuppression, TB exposure, or livestock/dairy exposure?", "teach": "Egypt-specific: brucellosis from unpasteurized dairy. Also TB spine. Immunosuppression + spine pain = epidural abscess risk.", "options": [{"label": "Severe + progressive + immunosuppressed / IV drug", "cls": "yes", "next": "emergency_infection", "tag": "High Risk"}, {"label": "Source identified OR unclear \u2014 non-emergency", "next": "urgent_infection", "cls": "warn"}]}, "emergency_infection": {"num": "EMERGENCY PATH", "result": {"impression": "Epidural abscess or rapidly progressive infectious spondylitis", "dx": [{"name": "Epidural abscess", "level": "emergency"}, {"name": "Septic discitis", "level": "emergency"}], "action": "EMERGENCY MRI with contrast. Blood cultures x3. ESR/CRP. Empiric IV antibiotics. Neurosurgery. Do NOT delay imaging.", "red": true}}, "urgent_infection": {"num": "URGENT PATH", "result": {"impression": "Infectious spondylitis", "dx": [{"name": "Osteomyelitis/Discitis", "level": "urgent"}, {"name": "TB spine (Pott's)", "level": "urgent"}, {"name": "Brucellosis", "level": "urgent"}, {"name": "Retropharyngeal abscess", "level": "urgent"}], "action": "MRI with contrast. ESR/CRP. Blood cultures. Brucella serology if exposure. TB workup if risk. Empiric antibiotics if severe.", "red": true}}, "malignancy": {"num": "Step 3 - Malignancy Features", "text": "Constant progressive pain, worse at night, NOT relieved by rest or position? Age >50?", "teach": "Non-mechanical pain (rest/night pain) = infection or malignancy until proven otherwise.", "options": [{"label": "Constant + night + rest pain + age >50", "cls": "yes", "next": "urgent_malignancy", "tag": "Rest Pain"}, {"label": "Atypical, partially relieved, or younger patient", "next": "imaging_malignancy", "cls": "warn"}]}, "urgent_malignancy": {"num": "URGENT PATH", "result": {"impression": "Malignancy until proven otherwise", "dx": [{"name": "Metastatic spinal disease", "level": "urgent"}, {"name": "Multiple myeloma", "level": "urgent"}, {"name": "Primary bone tumor", "level": "urgent"}, {"name": "Chordoma", "level": "urgent"}, {"name": "Intradural tumor", "level": "urgent"}], "action": "MRI whole spine. CBC, ESR/CRP, calcium, ALP, protein electrophoresis. Search for primary if unknown. Oncology referral.", "red": true}}, "imaging_malignancy": {"num": "CAUTIOUS PATH", "result": {"impression": "Possible early/atypical malignancy", "dx": [{"name": "Metastasis (early)", "level": "urgent"}, {"name": "Foramen magnum tumor", "level": "urgent"}, {"name": "Lymphoma / haematological malignancy", "level": "urgent"}], "action": "MRI cervical spine. If age >50 or suspicion: full malignancy workup. Do NOT dismiss without imaging.", "red": false}}, "neuro_vascular": {"num": "Step 3 - Neurological & Vascular", "text": "Pain radiates to the arm, OR bilateral limb symptoms, gait problems, or hand clumsiness?", "teach": "Unilateral arm = root. Bilateral upper+lower limbs + gait = cord. Most critical fork in non-traumatic neck pain.", "options": [{"label": "Arm radiation / numbness / tingling (unilateral)", "cls": "yes", "next": "radiculopathy", "tag": "Arm"}, {"label": "BOTH arms + legs + gait / hand clumsiness", "cls": "opt", "next": "myelopathy", "tag": "Cord"}, {"label": "Axial neck pain only", "cls": "no", "next": "referred_neuralgic", "tag": "Axial Only"}]}, "radiculopathy": {"num": "Step 4 - Radiculopathy Pattern", "text": "Worse with flexion / cough / Valsalva / dermatomal? Or extension / rotation? Abrupt shoulder pain after viral illness?", "teach": "Flexion/Valsalva = disc. Extension/rotation = facet. Abrupt severe shoulder pain after viral illness = brachial neuritis. Burning dermatomal pain = zoster.", "options": [{"label": "Flexion/Valsalva/dermatomal", "cls": "yes", "next": "result_disc", "tag": "Disc"}, {"label": "Extension/rotation", "cls": "opt", "next": "result_facet", "tag": "Facet"}, {"label": "Abrupt severe shoulder + viral illness", "cls": "warn", "next": "result_brachial", "tag": "Neuritis"}, {"label": "Burning dermatomal pain + skin rash", "cls": "no", "next": "result_zoster", "tag": "Zoster"}]}, "result_disc": {"num": "RADICULOPATHY PATH", "result": {"impression": "Cervical radiculopathy - disc herniation or foraminal stenosis", "dx": [{"name": "Cervical disc herniation", "level": "moderate"}, {"name": "Foraminal stenosis", "level": "moderate"}, {"name": "DDD", "level": "consider"}], "action": "MRI to confirm level. Conservative: analgesia, PT, short collar. Progressive weakness or >6 weeks: ACDF/foraminotomy.", "red": false}}, "result_facet": {"num": "FACET PATH", "result": {"impression": "Cervical radiculopathy \u2014 facet/foraminal pattern", "dx": [{"name": "Foraminal stenosis", "level": "moderate"}, {"name": "Cervical facet arthropathy with radiculopathy", "level": "moderate"}, {"name": "Uncovertebral joint hypertrophy", "level": "consider"}, {"name": "Cervical spondylosis (radicular)", "level": "consider"}], "action": "MRI cervical spine to assess foraminal stenosis. EMG/NCS if clinical picture unclear. Extension/rotation provocative pattern \u2014 check Spurling's sign. Physiotherapy, NSAIDs, cervical collar short-term. Refer if radiculopathy fails 6 weeks conservative care.", "red": false}}, "result_brachial": {"num": "NEURALGIC PATH", "result": {"impression": "Brachial neuritis (Parsonage-Turner syndrome)", "dx": [{"name": "Brachial neuritis", "level": "moderate"}, {"name": "Viral plexopathy", "level": "consider"}], "action": "Clinical diagnosis. MRI brachial plexus if atypical. EMG at 3-4 weeks. Pain control. Most recover spontaneously over months. Rule out mass lesion.", "red": false}}, "result_zoster": {"num": "NEURALGIC PATH", "result": {"impression": "Herpes zoster (cervical dermatome)", "dx": [{"name": "Herpes zoster", "level": "moderate"}, {"name": "Post-herpetic neuralgia", "level": "consider"}], "action": "Antivirals (acyclovir/valacyclovir) within 72h of rash onset. Pain control. If no rash but high suspicion: PCR from skin lesion. Ophthalmology if V1 involvement.", "red": false}}, "myelopathy": {"num": "Step 4 - Myelopathy Urgency", "text": "Bladder/bowel dysfunction, saddle numbness, or rapidly progressive weakness over days/weeks?", "teach": "Myelopathy is the most commonly missed serious neck diagnosis. Rapid progression = surgical emergency.", "options": [{"label": "Rapid progression + bladder/bowel", "cls": "yes", "next": "emergency_myelopathy", "tag": "Rapid"}, {"label": "Gradual, chronic, or unclear progression", "next": "urgent_myelopathy", "cls": "warn"}]}, "emergency_myelopathy": {"num": "EMERGENCY PATH", "result": {"impression": "Acute cervical cord compression \u2014 surgical emergency", "dx": [{"name": "Acute epidural hematoma/abscess", "level": "emergency"}, {"name": "Spinal cord infarction", "level": "emergency"}, {"name": "Acute traumatic cord compression", "level": "emergency"}, {"name": "Acute OPLL with sudden deficit", "level": "emergency"}, {"name": "Intradural tumor with hemorrhage", "level": "emergency"}], "action": "IMMEDIATE neurosurgical referral. Urgent MRI cervical spine \u2014 do not delay for plain films. Secure airway if respiratory compromise. IV methylprednisolone if acute traumatic (per protocol). Bladder catheterisation if retention. NPO.", "red": true}}, "urgent_myelopathy": {"num": "URGENT PATH", "result": {"impression": "Cervical myelopathy - surgical candidate", "dx": [{"name": "Degenerative cervical myelopathy", "level": "urgent"}, {"name": "OPLL", "level": "urgent"}, {"name": "Cervical stenosis", "level": "urgent"}, {"name": "Chiari malformation", "level": "urgent"}, {"name": "Syringomyelia", "level": "urgent"}, {"name": "Spinal dural AV fistula", "level": "urgent"}], "action": "MRI cervical + whole spine if Chiari/syringomyelia/AVF. mJOA/Nurick grading. Functional decline -> surgical decompression. Early/stable -> close follow-up.", "red": true}}, "referred_neuralgic": {"num": "Step 4 - Referred & Atypical", "text": "Chest pain, dyspnea, palpitations, jaw pain, dysphagia, or pain worse with exertion?", "teach": "Neck pain can be referred from heart, aorta, esophagus, thyroid, or lung apex. Dangerous blind spot.", "options": [{"label": "Chest pain / dyspnea / palpitations / exertional", "cls": "yes", "next": "cardiac_referred", "tag": "Cardiac"}, {"label": "Dysphagia /odynophagia / thyroid swelling", "cls": "opt", "next": "esoph_thyroid", "tag": "Esoph/Thyroid"}, {"label": "Shoulder pain / arm heaviness / lung apex signs", "cls": "warn", "next": "shoulder_lung", "tag": "Shoulder/Lung"}, {"label": "None of these", "cls": "no", "next": "inflammatory", "tag": "No Referred"}]}, "cardiac_referred": {"num": "EMERGENCY/URGENT PATH", "result": {"impression": "Referred pain from cardiovascular or thoracic emergency", "dx": [{"name": "Myocardial infarction / Angina", "level": "emergency"}, {"name": "Aortic dissection", "level": "emergency"}, {"name": "Pulmonary embolism", "level": "emergency"}], "action": "ECG immediately. Troponins. Chest X-ray. CTA chest if aortic dissection or PE suspected. Do NOT treat as neck strain.", "red": true}}, "esoph_thyroid": {"num": "URGENT PATH", "result": {"impression": "Esophageal or thyroid pathology referring to neck", "dx": [{"name": "Esophageal pathology", "level": "urgent"}, {"name": "Thyroid pathology", "level": "urgent"}], "action": "Barium swallow or endoscopy if dysphagia. Thyroid ultrasound + TSH. CT neck/chest if mass effect. ENT/endoscopy referral.", "red": true}}, "shoulder_lung": {"num": "URGENT PATH", "result": {"impression": "Shoulder pathology or apical lung lesion", "dx": [{"name": "Shoulder pathology (rotator cuff/impingement)", "level": "moderate"}, {"name": "Pancoast tumor", "level": "urgent"}, {"name": "Lung apex infection", "level": "urgent"}], "action": "Shoulder X-ray + exam. If Pancoast suspected: CT chest with contrast, MRI brachial plexus. Horner's syndrome + arm pain = Pancoast until proven otherwise.", "red": true}}, "inflammatory": {"num": "Step 5 - Inflammatory", "text": "Morning stiffness >1 hour, improves with movement, dramatically better with NSAIDs? Age <45?", "teach": "Axial spondyloarthropathy: morning stiffness + NSAID response + young age. Do not miss this in young adults with chronic neck pain.", "options": [{"label": "All three + age <45", "cls": "yes", "next": "result_spondylo", "tag": "Inflammatory"}, {"label": "Partially / age >45", "cls": "opt", "next": "result_mixed_inflam", "tag": "Partial"}, {"label": "No", "cls": "no", "next": "metabolic", "tag": "Not Inflammatory"}]}, "result_spondylo": {"num": "INFLAMMATORY PATH", "result": {"impression": "Axial spondyloarthropathy", "dx": [{"name": "Ankylosing spondylitis", "level": "moderate"}, {"name": "Psoriatic arthritis", "level": "moderate"}, {"name": "Reactive arthritis", "level": "moderate"}], "action": "HLA-B27. Sacroiliac MRI. Rheumatology. Screen uveitis, psoriasis, IBD, enthesopathy. If known RA + neck pain -> flexion-extension X-rays for C1-C2 instability.", "red": false}}, "result_mixed_inflam": {"num": "MIXED PATH", "result": {"impression": "Inflammatory component or PMR / crowned dens", "dx": [{"name": "Early AS", "level": "consider"}, {"name": "Polymyalgia rheumatica", "level": "moderate"}, {"name": "Crowned dens syndrome", "level": "moderate"}, {"name": "DISH (cervical)", "level": "consider"}], "action": "ESR/CRP. If age >50 + shoulder girdle -> PMR workup + exclude GCA. Crowned dens: CT C1-C2 showing CPPD around dens. DISH: flowing ossification on X-ray.", "red": false}}, "metabolic": {"num": "Step 5 - Metabolic & Bone", "text": "Age >60, known osteoporosis, steroid use, Paget's disease, gout, or hyperparathyroidism?", "teach": "Elderly + steroid use + neck pain = pathological fracture until imaging clears it. Gout in cervical spine is rare but described.", "options": [{"label": "Age >60 + osteoporosis/steroids + sudden pain", "cls": "yes", "next": "result_osteoporotic", "tag": "Osteoporotic"}, {"label": "Known Paget's / hyperparathyroidism / gout", "cls": "opt", "next": "result_metabolic", "tag": "Metabolic"}, {"label": "None", "cls": "no", "next": "mechanical", "tag": "No Metabolic"}]}, "result_osteoporotic": {"num": "URGENT PATH", "result": {"impression": "Pathological or osteoporotic cervical fracture", "dx": [{"name": "Osteoporotic compression fracture", "level": "urgent"}, {"name": "Pathological fracture", "level": "urgent"}], "action": "CT cervical spine. MRI if cord signs. DEXA scan. Endocrinology if recurrent. Rule out myeloma if no trauma and osteoporotic fracture.", "red": true}}, "result_metabolic": {"num": "MODERATE PATH", "result": {"impression": "Metabolic bone disease affecting cervical spine", "dx": [{"name": "Paget's disease (cervical)", "level": "moderate"}, {"name": "Hyperparathyroidism", "level": "moderate"}, {"name": "Tophaceous cervical gout", "level": "consider"}], "action": "X-ray: cotton-wool appearance (Paget's), brown tumors (hyperPTH), punched-out lesions (gout). Labs: Ca, PTH, ALP, uric acid. Specific treatment per diagnosis.", "red": false}}, "mechanical": {"num": "Step 6 - Mechanical", "text": "What makes pain worse - flexion/sitting/Valsalva, extension/rotation/standing, or posture/stress/end-of-day diffuse ache?", "teach": "Flexion = discogenic. Extension = facet. Posture/diffuse = myofascial. Directional preference is the single most useful mechanical discriminator.", "options": [{"label": "Flexion + sitting + Valsalva", "cls": "yes", "next": "result_mechanical_disc", "tag": "Disc"}, {"label": "Extension + rotation + standing", "cls": "opt", "next": "result_mechanical_facet", "tag": "Facet"}, {"label": "Posture / stress / diffuse / trigger points", "cls": "no", "next": "result_mechanical_myo", "tag": "Myofascial"}]}, "result_mechanical_disc": {"num": "MECHANICAL PATH", "result": {"impression": "Mechanical discogenic pain", "dx": [{"name": "Degenerative disc disease", "level": "consider"}, {"name": "Early disc herniation", "level": "consider"}], "action": "Conservative: activity modification, PT, analgesia. MRI only if red flags or >6 weeks. Avoid prolonged collar.", "red": false}}, "result_mechanical_facet": {"num": "MECHANICAL PATH", "result": {"impression": "Facet arthropathy or cervical spondylosis", "dx": [{"name": "Facet syndrome", "level": "consider"}, {"name": "Cervical spondylosis", "level": "consider"}, {"name": "Baastrup's disease", "level": "consider"}], "action": "Extension worsening = facet. Trial PT, medial branch block, radiofrequency. X-ray degenerative changes. MRI if neurology.", "red": false}}, "result_mechanical_myo": {"num": "MYOFASCIAL PATH", "result": {"impression": "Myofascial pain syndrome or chronic primary neck pain", "dx": [{"name": "Myofascial pain syndrome", "level": "consider"}, {"name": "Fibromyalgia", "level": "consider"}, {"name": "Spasmodic torticollis", "level": "consider"}, {"name": "Levator scapulae syndrome", "level": "consider"}, {"name": "Chronic primary neck pain", "level": "consider"}], "action": "Check trigger points. Ensure structural imaging normal. Address posture, ergonomics, psychosocial stressors. Physiatry/pain management if refractory.", "red": false}}}</script>
+<script type="application/json" id="d-safety">[{"cluster": "Cardiovascular & Thoracic Referred", "items": [{"name": "Myocardial infarction / Angina", "clue": "Chest pressure, dyspnea, exertional neck pain, diaphoresis"}, {"name": "Aortic dissection", "clue": "Tearing chest/back pain, pulse differential, hypertension"}, {"name": "Pulmonary embolism", "clue": "Dyspnea, tachypnea, pleuritic chest pain, DVT risk"}, {"name": "Pancoast tumor", "clue": "Arm pain + Horner's + smoker / age >50"}]}, {"cluster": "Neurological & Neuralgic", "items": [{"name": "Brachial neuritis (Parsonage-Turner)", "clue": "Abrupt severe shoulder pain after viral illness -> then weakness"}, {"name": "Herpes zoster", "clue": "Burning dermatomal pain -> vesicular rash within days"}, {"name": "Spinal dural AV fistula", "clue": "Progressive myelopathy over months, worse with exertion"}, {"name": "Spinal cord infarction", "clue": "Acute myelopathy + severe neck pain, aortic surgery/vascular risk"}]}, {"cluster": "Esophageal, Thyroid & ENT", "items": [{"name": "Esophageal pathology", "clue": "Dysphagia, odynophagia, pain with swallowing"}, {"name": "Thyroid pathology", "clue": "Neck mass, hoarseness, TSH abnormal, thyroid nodule"}, {"name": "Retropharyngeal abscess", "clue": "Fever + neck stiffness + dysphagia + drooling, often child or diabetic"}, {"name": "TMJ disorder", "clue": "Jaw clicking, pain with chewing, temporal pain"}]}, {"cluster": "Metabolic & Bone", "items": [{"name": "Osteoporotic/pathological fracture", "clue": "Age >60, steroid use, minimal trauma, sudden axial pain"}, {"name": "Paget's disease", "clue": "Bone deformity, hearing loss, ALP elevated, X-ray cotton-wool"}, {"name": "Tophaceous gout", "clue": "Known gout, elevated uric acid, punched-out X-ray lesions"}, {"name": "Hyperparathyroidism", "clue": "Elevated calcium, bone pain, renal stones, brown tumors"}]}, {"cluster": "Post-Surgical & Iatrogenic", "items": [{"name": "Post-surgical syndrome (ACDF/laminectomy)", "clue": "Prior cervical surgery, new/worsening symptoms at same or adjacent level"}, {"name": "Adjacent segment disease", "clue": "New symptoms above/below prior fusion, progressive over years"}, {"name": "C5 palsy", "clue": "Post-cervical surgery deltoid weakness, transient, within days"}]}, {"cluster": "Shoulder & Upper Limb Referred", "items": [{"name": "Rotator cuff / impingement", "clue": "Pain with abduction, positive impingement tests, normal neck exam"}, {"name": "Adhesive capsulitis", "clue": "Global shoulder restriction, pain at end range all directions"}, {"name": "Lung apex infection", "clue": "Shoulder pain + cough + fever + apical infiltrate"}]}]</script>
+<script type="application/json" id="d-surgery">[{"cluster": "Cervical Radiculopathy - ACDF / ACD / Foraminotomy", "items": [{"name": "Failure of >=6 weeks conservative care", "criteria": "Physical therapy, analgesia, epidural injections, NSAIDs -- no meaningful improvement", "source": "NASS"}, {"name": "Objective neurologic findings correlating with root compression", "criteria": "Motor deficit, reflex changes, or positive EMG matching the involved level on MRI/myelogram", "source": "NASS"}, {"name": "Progressive motor deficit", "criteria": "Documented worsening weakness in myotomal distribution -- does NOT require 6-week trial", "source": "NASS+AANS"}, {"name": "Severe unremitting radicular pain impacting function/sleep", "criteria": "Pain severe enough to impair daily activities or sleep, with MRI correlating to clinical level", "source": "NASS"}, {"name": "Confirmatory imaging: moderate-to-severe foraminal or canal stenosis", "criteria": "MRI, CT, or CT myelogram showing compression at the clinically suspected level", "source": "NASS+AANS"}, {"name": "Traumatic instability with radiculopathy", "criteria": "Fracture/dislocation causing root compression requiring stabilization", "source": "AANS"}]}, {"cluster": "Degenerative Cervical Myelopathy (DCM) - Decompression", "items": [{"name": "Moderate-to-severe DCM (mJOA <= 14)", "criteria": "Modified JOA score 0-14: gait disturbance, hand clumsiness, lower limb weakness, sphincter disturbance", "source": "AO Spine"}, {"name": "Mild DCM (mJOA 15-17) with functional decline or QoL impact", "criteria": "mJOA 15-17 with measurable functional impairment or poor quality of life -- surgery now supported by moderate evidence", "source": "AO Spine 2024"}, {"name": "MRI-confirmed cord compression with T2 hyperintensity", "criteria": "Signal change in cord on T2-weighted MRI = myelomalacia -- higher risk of progression", "source": "AO Spine"}, {"name": "Progressive neurological deterioration on observation", "criteria": "Documented decline in mJOA, Nurick grade, or new symptoms during conservative management", "source": "AO Spine"}, {"name": "Gait disturbance or hand dexterity loss", "criteria": "Inability to perform fine motor tasks or unsteady gait -- functional red flags for surgery", "source": "AO Spine"}]}, {"cluster": "Cervical Stenosis - Laminoplasty / Laminectomy", "items": [{"name": "Multilevel stenosis (>=3 levels) without kyphosis", "criteria": "Sagittal alignment maintained (<13 deg kyphosis) -- laminoplasty preferred to preserve motion", "source": "AO Spine"}, {"name": "Laminectomy for stenosis with preserved alignment", "criteria": "When lordosis is maintained and anterior approach would require >=3 levels", "source": "AO Spine"}, {"name": "OPLL causing stenosis", "criteria": "Ossification of posterior longitudinal ligament -- posterior decompression often preferred for multilevel disease", "source": "AO Spine"}, {"name": "Adjacent segment disease post-fusion with stenosis", "criteria": "New stenosis above/below prior fusion causing myelopathy or radiculopathy", "source": "NASS"}]}, {"cluster": "Cervical Corpectomy", "items": [{"name": "Severe spinal cord or nerve root compression from anterior pathology", "criteria": "Retro-vertebral compression (behind vertebral body) requiring anterior decompression", "source": "AANS"}, {"name": "Vertebral body collapse or instability", "criteria": "Vertebral body fracture, tumor, or infection causing structural failure -- corpectomy + cage/graft + plate", "source": "AANS"}, {"name": "Severe kyphosis or deformity from anterior column failure", "criteria": "Kyphotic deformity requiring anterior reconstruction and restoration of alignment", "source": "AANS"}, {"name": "Multi-level disc disease behind vertebral body", "criteria": "3 or more contiguous levels of disc herniation requiring extensive anterior decompression", "source": "NASS"}, {"name": "Tumor or infection involving vertebral body", "criteria": "Neoplastic or infectious destruction of vertebral body requiring excision and reconstruction", "source": "AANS"}]}, {"cluster": "Cervical Trauma / Instability", "items": [{"name": "Unstable fracture or dislocation", "criteria": "AO Spine F2/F3 fractures, translation >3.5mm, angulation >11 deg, ligamentous disruption", "source": "AO Spine"}, {"name": "Atlanto-axial instability (RA, Down, trauma)", "criteria": "ADI >3mm adult / >5mm child, or neurologic symptoms with instability on flexion-extension", "source": "Consensus"}, {"name": "Odontoid fracture Type II/III with displacement", "criteria": ">5mm displacement, or failed halo/conservative management -- C1-C2 fusion or odontoid screw", "source": "AANS"}, {"name": "Cervical spine instability post-infection or tumor", "criteria": "Pathological destruction causing mechanical instability requiring fusion", "source": "AANS"}]}, {"cluster": "Artificial Disc Replacement (ADR)", "items": [{"name": "Single-level symptomatic disc disease C3-C7", "criteria": "One level only. Radiculopathy from disc herniation or DDD with preserved disc height", "source": "NASS"}, {"name": "Failure of >=6 weeks conservative care", "criteria": "Same conservative trial as ACDF -- PT, injections, analgesia", "source": "NASS"}, {"name": "No significant facet arthropathy", "criteria": "Facet joints relatively preserved -- ADR will not address facet-mediated pain", "source": "NASS"}, {"name": "No prior cervical fusion at adjacent level", "criteria": "ADR not indicated adjacent to prior fusion -- increased adjacent segment risk", "source": "NASS"}, {"name": "No osteoporosis or metabolic bone disease", "criteria": "Bone quality must support implant -- DEXA or clinical assessment", "source": "NASS"}]}, {"cluster": "Emergency / Urgent Surgery - No Conservative Trial", "items": [{"name": "Progressive myelopathy with rapid neurological decline", "criteria": "Days-to-weeks worsening of motor/sensory function or sphincter disturbance -- emergency decompression", "source": "AO Spine"}, {"name": "Cauda equina / conus syndrome (rare cervical equivalent)", "criteria": "Acute sphincter loss with cord compression -- surgical emergency", "source": "Consensus"}, {"name": "Epidural abscess with cord compression or sepsis", "criteria": "Infectious compression + neurologic deficit or systemic sepsis -- emergent decompression + washout", "source": "AANS"}, {"name": "Traumatic cord compression with deficit", "criteria": "Post-traumatic epidural hematoma or fracture fragment compressing cord -- emergent decompression", "source": "AO Spine"}, {"name": "Oncologic cord compression with neurologic deficit", "criteria": "Metastatic or primary tumor causing compression -- urgent decompression + stabilization if life expectancy >3 months", "source": "AANS"}]}]</script>
+<script type="application/json" id="d-rel">{"emergency_trauma": {"sn": ["Epidural abscess / septic discitis", "Spinal cord infarction", "Epidural hematoma"], "sx": ["Unstable fracture or dislocation", "Traumatic cord compression with deficit", "Atlanto-axial instability (RA, Down, trauma)"]}, "urgent_trauma": {"sn": ["Osteoporotic/pathological fracture"], "sx": ["Unstable fracture or dislocation", "Odontoid fracture Type II/III with displacement", "Atlanto-axial instability (RA, Down, trauma)"]}, "whiplash": {"sn": ["Myocardial infarction / Angina", "Aortic dissection", "Vertebral artery dissection / carotid dissection"], "sx": []}, "dissection": {"sn": ["Myocardial infarction / Angina", "Aortic dissection", "Pulmonary embolism"], "sx": []}, "emergency_infection": {"sn": ["Retropharyngeal abscess", "Esophageal pathology"], "sx": ["Epidural abscess with cord compression or sepsis", "Tumor or infection involving vertebral body"]}, "urgent_infection": {"sn": ["Retropharyngeal abscess", "Esophageal pathology", "Thyroid pathology"], "sx": ["Tumor or infection involving vertebral body", "Cervical spine instability post-infection or tumor"]}, "urgent_malignancy": {"sn": ["Pancoast tumor", "Esophageal pathology", "Thyroid pathology"], "sx": ["Oncologic cord compression with neurologic deficit", "Tumor or infection involving vertebral body", "Vertebral body collapse or instability"]}, "imaging_malignancy": {"sn": ["Pancoast tumor", "Esophageal pathology", "Thyroid pathology"], "sx": ["Oncologic cord compression with neurologic deficit"]}, "result_disc": {"sn": ["Brachial neuritis (Parsonage-Turner)", "Herpes zoster", "Rotator cuff / impingement", "Pancoast tumor"], "sx": ["Failure of >=6 weeks conservative care", "Objective neurologic findings correlating with root compression", "Progressive motor deficit", "Severe unremitting radicular pain impacting function/sleep", "Confirmatory imaging: moderate-to-severe foraminal or canal stenosis", "Single-level symptomatic disc disease C3-C7"]}, "result_facet": {"sn": ["Rotator cuff / impingement", "Adhesive capsulitis", "Osteoporotic/pathological fracture"], "sx": ["Failure of >=6 weeks conservative care", "Confirmatory imaging: moderate-to-severe foraminal or canal stenosis"]}, "result_brachial": {"sn": ["Herpes zoster", "Brachial neuritis (Parsonage-Turner)", "Pancoast tumor", "Rotator cuff / impingement"], "sx": []}, "result_zoster": {"sn": ["Brachial neuritis (Parsonage-Turner)", "Esophageal pathology"], "sx": []}, "emergency_myelopathy": {"sn": ["Spinal cord infarction", "Spinal dural AV fistula", "Epidural abscess / septic discitis"], "sx": ["Progressive myelopathy with rapid neurological decline", "Traumatic cord compression with deficit", "Epidural abscess with cord compression or sepsis", "MRI-confirmed cord compression with T2 hyperintensity", "Moderate-to-severe DCM (mJOA <= 14)"]}, "urgent_myelopathy": {"sn": ["Spinal cord infarction", "Spinal dural AV fistula"], "sx": ["Moderate-to-severe DCM (mJOA <= 14)", "Mild DCM (mJOA 15-17) with functional decline or QoL impact", "MRI-confirmed cord compression with T2 hyperintensity", "Progressive neurological deterioration on observation", "Gait disturbance or hand dexterity loss", "Multilevel stenosis (>=3 levels) without kyphosis", "OPLL causing stenosis"]}, "cardiac_referred": {"sn": ["Myocardial infarction / Angina", "Aortic dissection", "Pulmonary embolism"], "sx": []}, "esoph_thyroid": {"sn": ["Esophageal pathology", "Thyroid pathology", "Retropharyngeal abscess"], "sx": []}, "shoulder_lung": {"sn": ["Rotator cuff / impingement", "Adhesive capsulitis", "Lung apex infection", "Pancoast tumor"], "sx": []}, "result_spondylo": {"sn": ["Osteoporotic/pathological fracture", "Paget's disease"], "sx": ["Unstable fracture or dislocation", "Atlanto-axial instability (RA, Down, trauma)"]}, "result_mixed_inflam": {"sn": ["Osteoporotic/pathological fracture", "Paget's disease", "Hyperparathyroidism"], "sx": []}, "result_osteoporotic": {"sn": ["Osteoporotic/pathological fracture", "Paget's disease", "Hyperparathyroidism"], "sx": ["Unstable fracture or dislocation", "Vertebral body collapse or instability"]}, "result_metabolic": {"sn": ["Paget's disease", "Hyperparathyroidism", "Tophaceous gout"], "sx": []}, "result_mechanical_disc": {"sn": ["Brachial neuritis (Parsonage-Turner)", "Rotator cuff / impingement", "Pancoast tumor", "Osteoporotic/pathological fracture"], "sx": ["Failure of >=6 weeks conservative care", "Single-level symptomatic disc disease C3-C7"]}, "result_mechanical_facet": {"sn": ["Rotator cuff / impingement", "Adhesive capsulitis", "Osteoporotic/pathological fracture"], "sx": ["Failure of >=6 weeks conservative care"]}, "result_mechanical_myo": {"sn": ["Rotator cuff / impingement", "Adhesive capsulitis", "Myocardial infarction / Angina"], "sx": []}}</script>
+<script>
+var STEPS, SN, SC, REL;
+var hist = [];
+
+function ge(id){ return document.getElementById(id); }
+function show(id){ ge(id).style.display = "block"; }
+function hide(id){ ge(id).style.display = "none"; }
+
+function err(msg){
+  ge("err-display").innerHTML = '<div class="err">ERROR: ' + msg + '</div>';
+}
+
+try { STEPS = JSON.parse(ge("d-steps").textContent);   } catch(e){ err("STEPS: "+e.message); }
+try { SN    = JSON.parse(ge("d-safety").textContent);  } catch(e){ err("SN: "+e.message); }
+try { SC    = JSON.parse(ge("d-surgery").textContent); } catch(e){ err("SC: "+e.message); }
+try { REL   = JSON.parse(ge("d-rel").textContent);     } catch(e){ err("REL: "+e.message); }
+
+function setProg(n){
+  ge("prog").style.width = Math.min(100, Math.round(n/6*100)) + "%";
+}
+
+function renderHist(){
+  var out = "";
+  for(var i=0; i<hist.length; i++){
+    var x = hist[i];
+    out += '<div class="h-item">';
+    out += '<div class="h-num">' + x.num + '</div>';
+    out += '<div class="h-q">' + x.q + '</div>';
+    out += '<div class="h-a ' + x.cls + '">✓ ' + x.a + '</div>';
+    out += '</div>';
+  }
+  ge("hist").innerHTML = out;
+  ge("back-btn").style.display = hist.length > 0 ? "block" : "none";
+  setProg(hist.length);
+}
+
+document.addEventListener("click", function(e){
+  var head = e.target;
+  while(head && head.getAttribute && !head.getAttribute("data-panel-toggle")){
+    head = head.parentNode;
+  }
+  if(!head || !head.getAttribute) return;
+  var pid = head.getAttribute("data-panel-toggle");
+  var panel = ge(pid);
+  if(!panel) return;
+  var body = panel.querySelector(".p-body");
+  var arrow = panel.querySelector(".p-arrow");
+  if(!body) return;
+  if(body.style.display === "block"){
+    body.style.display = "none";
+    if(arrow) arrow.textContent = "►";
+  } else {
+    body.style.display = "block";
+    if(arrow) arrow.textContent = "▼";
+  }
+});
+
+document.addEventListener("click", function(e){
+  var cb = e.target;
+  if(!cb.getAttribute || !cb.getAttribute("data-cb")) return;
+  var panelId = cb.getAttribute("data-cb");
+  var isSN = panelId === "sn-panel";
+  var on = cb.getAttribute("data-on") === "1";
+  if(on){
+    cb.setAttribute("data-on","0");
+    cb.textContent = "";
+    cb.style.background = "#0f172a";
+    cb.style.borderColor = "#475569";
+    var nm = cb.parentNode.querySelector(".iname");
+    if(nm){ nm.style.color = ""; nm.style.fontWeight = ""; }
+  } else {
+    cb.setAttribute("data-on","1");
+    cb.textContent = "✓";
+    cb.style.background = isSN ? "#f59e0b" : "#4ade80";
+    cb.style.borderColor = isSN ? "#f59e0b" : "#4ade80";
+    cb.style.color = isSN ? "#1c1917" : "#052e16";
+    var nm2 = cb.parentNode.querySelector(".iname");
+    if(nm2){ nm2.style.color = isSN ? "#f59e0b" : "#4ade80"; nm2.style.fontWeight = "600"; }
+  }
+  updateSum(panelId);
+});
+
+function updateSum(panelId){
+  var panel = ge(panelId);
+  var isSN = panelId === "sn-panel";
+  var cbs = panel.querySelectorAll("[data-on='1']");
+  var sum = panel.querySelector(".p-sum");
+  if(!sum) return;
+  if(!cbs.length){
+    sum.innerHTML = isSN
+      ? "<b style='color:#f59e0b'>All safety-net items ruled out.</b> Proceed with confidence."
+      : "<b style='color:#4ade80'>No surgical indications met.</b> Continue conservative management.";
+  } else {
+    var names = [];
+    for(var i=0; i<cbs.length; i++){
+      var nm = cbs[i].parentNode.querySelector(".iname");
+      if(nm) names.push((nm.textContent||nm.innerText).replace(/NASS|AO Spine|AANS|Consensus/g,"").trim());
+    }
+    sum.innerHTML = "<b style='color:"+(isSN?"#f59e0b":"#4ade80")+"'>" + cbs.length + (isSN?" item(s) NOT ruled out":" indication(s) met") + ":</b> " + names.join("; ");
+  }
+}
+
+function strContains(haystack, needle){
+  return haystack.toLowerCase().indexOf(needle.toLowerCase()) > -1;
+}
+
+function isRelSN(name, relList){
+  for(var i=0; i<relList.length; i++){
+    if(strContains(name, relList[i]) || strContains(relList[i], name)) return true;
+  }
+  return false;
+}
+
+function buildSNPanel(resultId){
+  var relList = (REL[resultId] && REL[resultId].sn) ? REL[resultId].sn : [];
+  var out = '<div class="p-head" data-panel-toggle="sn-panel">';
+  out += '<div><div class="p-title" style="color:#f59e0b">Safety Net</div>';
+  out += '<div class="p-sub">Tap items you have NOT excluded</div></div>';
+  out += '<span class="p-arrow">▼</span></div>';
+  out += '<div class="p-body" style="display:block">';
+
+  // Relevant section first
+  if(relList.length > 0){
+    out += '<div class="rel-banner sn-banner">⚠️ Most relevant for this diagnosis</div>';
+    for(var c=0; c<SN.length; c++){
+      var clusterHasRel = false;
+      for(var i=0; i<SN[c].items.length; i++){
+        if(isRelSN(SN[c].items[i].name, relList)){ clusterHasRel = true; break; }
+      }
+      if(!clusterHasRel) continue;
+      for(var i=0; i<SN[c].items.length; i++){
+        var it = SN[c].items[i];
+        if(!isRelSN(it.name, relList)) continue;
+        out += '<div class="ci ci-rel">';
+        out += '<div class="cb" data-cb="sn-panel" data-on="0"></div>';
+        out += '<div class="ib"><span class="iname rel-name">' + it.name + '</span><span class="isub">' + it.clue + '</span></div>';
+        out += '</div>';
+      }
+    }
+    out += '<div class="other-divider">All items</div>';
+  }
+
+  // All clusters
+  for(var c=0; c<SN.length; c++){
+    out += '<div class="clust"><div class="clust-t">' + SN[c].cluster + '</div>';
+    for(var i=0; i<SN[c].items.length; i++){
+      var it = SN[c].items[i];
+      var isRel = isRelSN(it.name, relList);
+      out += '<div class="ci' + (isRel ? ' ci-hl' : '') + '">';
+      out += '<div class="cb" data-cb="sn-panel" data-on="0"></div>';
+      out += '<div class="ib"><span class="iname' + (isRel ? ' hl-name' : '') + '">' + it.name + (isRel ? ' <span class="rel-dot"></span>' : '') + '</span><span class="isub">' + it.clue + '</span></div>';
+      out += '</div>';
+    }
+    out += '</div>';
+  }
+  out += '<div class="p-sum"><b style="color:#f59e0b">All safety-net items ruled out.</b> Proceed with confidence.</div>';
+  out += '</div>';
+  return out;
+}
+
+function buildSXPanel(resultId){
+  var relList = (REL[resultId] && REL[resultId].sx) ? REL[resultId].sx : [];
+  var out = '<div class="p-head" data-panel-toggle="sx-panel">';
+  out += '<div><div class="p-title" style="color:#4ade80">Surgical Indications</div>';
+  out += '<div class="p-sub">Tap criteria that ARE met</div></div>';
+  out += '<span class="p-arrow">►</span></div>';
+  out += '<div class="p-body">';
+
+  if(relList.length > 0){
+    out += '<div class="rel-banner sx-banner">★ Most relevant surgical criteria</div>';
+    for(var c=0; c<SC.length; c++){
+      for(var i=0; i<SC[c].items.length; i++){
+        var it = SC[c].items[i];
+        if(!isRelSN(it.name, relList)) continue;
+        var src = it.source.toLowerCase().replace(/[^a-z]/g,"");
+        var bdg = '<span class="bdg b-'+src+'">'+it.source+'</span>';
+        out += '<div class="ci ci-rel">';
+        out += '<div class="cb" data-cb="sx-panel" data-on="0"></div>';
+        out += '<div class="ib"><span class="iname rel-name">' + it.name + bdg + '</span><span class="isub">' + it.criteria + '</span></div>';
+        out += '</div>';
+      }
+    }
+    out += '<div class="other-divider">All criteria</div>';
+  }
+
+  for(var c=0; c<SC.length; c++){
+    out += '<div class="clust"><div class="clust-t">'+SC[c].cluster+'</div>';
+    for(var i=0; i<SC[c].items.length; i++){
+      var it = SC[c].items[i];
+      var isRel = isRelSN(it.name, relList);
+      var src = it.source.toLowerCase().replace(/[^a-z]/g,"");
+      var bdg = '<span class="bdg b-'+src+'">'+it.source+'</span>';
+      out += '<div class="ci' + (isRel ? ' ci-hl' : '') + '">';
+      out += '<div class="cb" data-cb="sx-panel" data-on="0"></div>';
+      out += '<div class="ib"><span class="iname' + (isRel ? ' hl-name' : '') + '">' + it.name + (isRel ? ' <span class="rel-dot sx-dot"></span>' : '') + bdg + '</span><span class="isub">' + it.criteria + '</span></div>';
+      out += '</div>';
+    }
+    out += '</div>';
+  }
+  out += '<div class="p-sum"><b style="color:#4ade80">No surgical indications met.</b> Continue conservative management.</div>';
+  out += '<p style="font-size:.57rem;color:#64748b;margin-top:6px;padding-top:5px;border-top:1px solid #334155">Sources: NASS Evidence-Based Clinical Guidelines; AO Spine/CSRS DCM Guidelines; AANS/CNS Clinical Practice Guidelines.</p>';
+  out += '</div>';
+  return out;
+}
+
+function go(id) {
+  try {
+    var s = STEPS[id];
+    if(!s) { err("Unknown step: " + id); return; }
+
+    if(s.result) {
+      hide("step-card");
+      show("result-card");
+      show("sn-panel");
+      show("sx-panel");
+      show("reset-btn");
+      var r = s.result;
+      var urg = r.red ? "emergency" : (function(){
+        for(var i=0; i<r.dx.length; i++){ if(r.dx[i].level==="urgent") return "urgent"; }
+        return "moderate";
+      })();
+      var pills = "";
+      for(var i=0; i<r.dx.length; i++){
+        pills += '<span class="dx ' + r.dx[i].level + '">' + r.dx[i].name + '</span>';
+      }
+      ge("result-card").innerHTML =
+        '<span class="urg ' + urg + '">' + urg + '</span>' +
+        '<div class="question">' + r.impression + '</div>' +
+        '<div class="section-lbl">Differential</div>' +
+        '<div>' + pills + '</div>' +
+        '<div class="section-lbl">Action</div>' +
+        '<div class="act-text">' + r.action + '</div>' +
+        '<div class="action' + (r.red ? ' red' : '') + '">' +
+        '<div class="act-t">' + (r.red ? 'URGENCY - Do NOT delay' : 'Next Steps') + '</div>' +
+        '<div class="act-b">' + (r.red ? 'Requires urgent/emergency intervention. Do not discharge without imaging and senior review.' : 'Monitor. If red flags develop, restart algorithm.') + '</div>' +
+        '</div>';
+      ge("sn-panel").innerHTML = buildSNPanel(id);
+      ge("sx-panel").innerHTML = buildSXPanel(id);
+      renderHist();
+      return;
+    }
+
+    show("step-card");
+    hide("result-card");
+    hide("sn-panel");
+    hide("sx-panel");
+    hide("reset-btn");
+    ge("s-num").textContent = s.num;
+    ge("s-text").textContent = s.text;
+    if(s.teach) {
+      ge("s-teach").textContent = s.teach;
+      ge("s-teach").style.display = "block";
+    } else {
+      ge("s-teach").style.display = "none";
+    }
+    var btns = ge("s-btns");
+    btns.innerHTML = "";
+    for(var j=0; j<s.options.length; j++) {
+      var o = s.options[j];
+      var b = document.createElement("button");
+      b.className = "btn " + (o.cls || "");
+      b.textContent = o.label;
+      (function(nxt, lbl, cls, num, qtxt){
+        b.onclick = function(){
+          hist.push({num:num, q:qtxt, a:lbl, cls:cls||"opt", nextId:nxt});
+          renderHist();
+          go(nxt);
+        };
+      })(o.next, o.label, o.cls, s.num, s.text);
+      btns.appendChild(b);
+    }
+    renderHist();
+  } catch(e) {
+    err("go(" + id + "): " + e.message);
+  }
+}
+
+function goBack(){
+  if(!hist.length) return;
+  hist.pop();
+  var prevId = hist.length > 0 ? hist[hist.length-1].nextId : "start";
+  if(hist.length > 0) hist.pop();
+  renderHist();
+  go(prevId);
+}
+
+function resetAll(){
+  hist = [];
+  hide("result-card");
+  hide("sn-panel");
+  hide("sx-panel");
+  hide("reset-btn");
+  ge("hist").innerHTML = "";
+  ge("back-btn").style.display = "none";
+  setProg(0);
+  show("step-card");
+  go("start");
+}
+
+go("start");
+
+</script>
+
+</body>
+</html>

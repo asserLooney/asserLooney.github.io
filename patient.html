@@ -5,79 +5,218 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Patient Data Form</title>
   <style>
-    body{font-family:Arial,sans-serif;background:#f5f7fb;margin:0;padding:24px;color:#1f2937}
-    .card{max-width:760px;margin:0 auto;background:#fff;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.08);padding:24px}
-    h1{margin-top:0;font-size:1.6rem}
-    .field{margin-bottom:16px}
-    label{display:block;margin-bottom:8px;font-weight:600}
-    input[type=text],input[type=date],input[type=number],input[type=file],textarea{width:100%;box-sizing:border-box;padding:12px;border:1px solid #cbd5e1;border-radius:10px;font-size:1rem;background:#fff}
-    input[type=file]{padding:10px}
-    button{background:#2563eb;color:#fff;border:none;padding:12px 18px;border-radius:10px;font-size:1rem;cursor:pointer}
-    button:hover{background:#1d4ed8}
-    .preview{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px;margin-top:14px}
-    .preview img{width:100%;height:120px;object-fit:cover;border-radius:10px;border:1px solid #e5e7eb}
-    .hint{font-size:.92rem;color:#6b7280;margin-top:6px}
-    .status{margin-top:14px;padding:12px;border-radius:10px;background:#eef2ff;color:#3730a3;display:none}
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f7fb;
+      margin: 0;
+      padding: 24px;
+      color: #1f2937;
+    }
+
+    .card {
+      max-width: 760px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.08);
+      padding: 24px;
+    }
+
+    h1 {
+      margin-top: 0;
+      font-size: 1.6rem;
+    }
+
+    .field {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    input[type=text],
+    input[type=date],
+    input[type=number],
+    input[type=file],
+    textarea {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      font-size: 1rem;
+      background: #fff;
+    }
+
+    input[type=file] {
+      padding: 10px;
+    }
+
+    button {
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #1d4ed8;
+    }
+
+    button:disabled {
+      background: #93c5fd;
+      cursor: not-allowed;
+    }
+
+    .preview {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .preview img {
+      width: 100%;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 10px;
+      border: 1px solid #e5e7eb;
+    }
+
+    .hint {
+      font-size: .92rem;
+      color: #6b7280;
+      margin-top: 6px;
+    }
+
+    .status {
+      margin-top: 14px;
+      padding: 12px;
+      border-radius: 10px;
+      background: #eef2ff;
+      color: #3730a3;
+      display: none;
+      white-space: pre-line;
+    }
   </style>
 </head>
 <body>
   <div class="card">
     <h1>Patient Data Form</h1>
+
     <form id="patientForm">
-      <div class="field"><label for="patientName">Patient Name</label><input type="text" id="patientName" name="patientName" required /></div>
-      <div class="field"><label for="patientDob">Date of Birth</label><input type="date" id="patientDob" name="patientDob" required /></div>
-      <div class="field"><label for="patientAge">Age</label><input type="number" id="patientAge" name="patientAge" min="0" max="150" /></div>
-      <div class="field"><label for="notes">Notes</label><textarea id="notes" name="notes" rows="4"></textarea></div>
-      <div class="field"><label for="patientImages">Images</label><input type="file" id="patientImages" name="patientImages" accept="image/*" multiple /><div class="hint">You can select one or more images.</div></div>
-      <button type="submit">Submit</button>
+      <div class="field">
+        <label for="patientName">Patient Name</label>
+        <input type="text" id="patientName" name="patientName" required />
+      </div>
+
+      <div class="field">
+        <label for="patientDob">Date of Birth</label>
+        <input type="date" id="patientDob" name="patientDob" required />
+      </div>
+
+      <div class="field">
+        <label for="patientAge">Age</label>
+        <input type="number" id="patientAge" name="patientAge" min="0" max="150" />
+      </div>
+
+      <div class="field">
+        <label for="notes">Notes</label>
+        <textarea id="notes" name="notes" rows="4"></textarea>
+      </div>
+
+      <div class="field">
+        <label for="patientImages">Images</label>
+        <input type="file" id="patientImages" name="patientImages" accept="image/*" multiple />
+        <div class="hint">
+          You can select one or more images. A unique record ID and unique media names will be generated automatically by the backend.
+        </div>
+      </div>
+
+      <button type="submit" id="submitBtn">Submit</button>
     </form>
+
     <div id="preview" class="preview"></div>
     <div id="status" class="status"></div>
   </div>
+
   <script>
     const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbySLOMgQSluJInsvpjc2O263jFixPxcZ3rpyHOCjpLFZquAMW3dxvStCfxA9hzeo0zKKQ/exec';
+
     const fileInput = document.getElementById('patientImages');
     const preview = document.getElementById('preview');
     const form = document.getElementById('patientForm');
     const status = document.getElementById('status');
+    const submitBtn = document.getElementById('submitBtn');
+
     fileInput.addEventListener('change', () => {
       preview.innerHTML = '';
+
       Array.from(fileInput.files).forEach(file => {
         const reader = new FileReader();
+
         reader.onload = e => {
           const img = document.createElement('img');
           img.src = e.target.result;
           img.alt = file.name;
           preview.appendChild(img);
         };
+
         reader.readAsDataURL(file);
       });
     });
+
     form.addEventListener('submit', async e => {
       e.preventDefault();
+
+      submitBtn.disabled = true;
       status.style.display = 'block';
       status.textContent = 'Saving...';
-      const files = await Promise.all(Array.from(fileInput.files).map(file => new Promise(resolve => {
-        const reader = new FileReader();
-        reader.onload = () => resolve({ name: file.name, type: file.type, data: reader.result.split(',')[1] });
-        reader.readAsDataURL(file);
-      })));
-      const payload = {
-        patientName: form.patientName.value.trim(),
-        patientDob: form.patientDob.value,
-        patientAge: form.patientAge.value,
-        notes: form.notes.value.trim(),
-        files
-      };
-      await fetch(WEB_APP_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify(payload)
-      });
-      status.textContent = 'Submitted. Check Google Sheets and Drive.';
-      form.reset();
-      preview.innerHTML = '';
+
+      try {
+        const files = await Promise.all(
+          Array.from(fileInput.files).map(file => new Promise(resolve => {
+            const reader = new FileReader();
+
+            reader.onload = () => resolve({
+              name: file.name,
+              type: file.type,
+              data: reader.result.split(',')[1]
+            });
+
+            reader.readAsDataURL(file);
+          }))
+        );
+
+        const payload = {
+          patientName: form.patientName.value.trim(),
+          patientDob: form.patientDob.value,
+          patientAge: form.patientAge.value,
+          notes: form.notes.value.trim(),
+          files
+        };
+
+        await fetch(WEB_APP_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(payload)
+        });
+
+        status.textContent = 'Submitted successfully.\nA unique Record ID and unique media names were generated in Google Sheets / Google Drive.';
+        form.reset();
+        preview.innerHTML = '';
+      } catch (error) {
+        status.textContent = 'Submission failed. Please try again.';
+      } finally {
+        submitBtn.disabled = false;
+      }
     });
   </script>
 </body>
